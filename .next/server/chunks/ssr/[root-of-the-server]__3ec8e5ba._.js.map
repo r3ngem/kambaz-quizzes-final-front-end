@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 3, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 23, "column": 0}, "map": {"version":3,"sources":["file:///Users/meg/Documents/webdev-final-project/kambaz-quizzes-final-front-end/app/%28Kambaz%29/Courses/%5Bcid%5D/Quizzes/%5Baid%5D/Preview/page.tsx"],"sourcesContent":["export default function Preview() {\n  return (\n    <div id=\"wd-preview\">\n      <h1 id=\"wd-preview-title\">Preview</h1> <hr />\n      </div>\n  )\n}"],"names":[],"mappings":";;;;;;AAAe,SAAS;IACtB,qBACE,8OAAC;QAAI,IAAG;;0BACN,8OAAC;gBAAG,IAAG;0BAAmB;;;;;;YAAY;0BAAC,8OAAC;;;;;;;;;;;AAG9C","debugId":null}}]
+}

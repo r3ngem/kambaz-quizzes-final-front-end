@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 3, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 23, "column": 0}, "map": {"version":3,"sources":["file:///Users/meg/Documents/webdev-final-project/kambaz-quizzes-final-front-end/app/%28Kambaz%29/Courses/%5Bcid%5D/Quizzes/page.tsx"],"sourcesContent":["import { useParams } from \"next/navigation\";\nimport { Button } from \"react-bootstrap\";\nimport { FaPlus } from \"react-icons/fa6\";\n\nexport default function Quizzes() {\n  const { cid, aid } = useParams();\n  return (\n    <div id=\"wd-quizzes\">\n      <h1 id=\"wd-quizzes-title\">Quizzes</h1> <hr />\n      <Button variant=\"danger\" size=\"lg\" className=\"me-1 float-end\" id=\"wd-view-progress\" \n     href={`/Courses/${cid}/Quizzes/new`}>\n       <FaPlus className=\"position-relative me-2\" style={{ bottom: \"1px\" }} />\n       Quiz\n     </Button>\n      </div>\n  )\n}"],"names":[],"mappings":";;;;;AAAA;AAAA;AACA;AACA;;;;;AAEe,SAAS;IACtB,MAAM,EAAE,GAAG,EAAE,GAAG,EAAE,GAAG,IAAA,kMAAS;IAC9B,qBACE,8OAAC;QAAI,IAAG;;0BACN,8OAAC;gBAAG,IAAG;0BAAmB;;;;;;YAAY;0BAAC,8OAAC;;;;;0BACxC,8OAAC,kMAAM;gBAAC,SAAQ;gBAAS,MAAK;gBAAK,WAAU;gBAAiB,IAAG;gBAClE,MAAM,CAAC,SAAS,EAAE,IAAI,YAAY,CAAC;;kCACjC,8OAAC,yJAAM;wBAAC,WAAU;wBAAyB,OAAO;4BAAE,QAAQ;wBAAM;;;;;;oBAAK;;;;;;;;;;;;;AAK9E","debugId":null}}]
+}

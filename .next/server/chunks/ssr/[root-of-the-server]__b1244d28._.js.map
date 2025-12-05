@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 3, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 23, "column": 0}, "map": {"version":3,"sources":["file:///Users/meg/Documents/webdev-final-project/kambaz-quizzes-final-front-end/app/%28Kambaz%29/Courses/%5Bcid%5D/Quizzes/%5Baid%5D/page.tsx"],"sourcesContent":["import { useParams } from \"next/navigation\";\n\nexport default function QuizDetails() {\n    const { cid, aid } = useParams();\n    return (\n        <div>\n            <h1> Quiz Details</h1>\n        </div>\n    )\n}"],"names":[],"mappings":";;;;;AAAA;AAAA;;;AAEe,SAAS;IACpB,MAAM,EAAE,GAAG,EAAE,GAAG,EAAE,GAAG,IAAA,kMAAS;IAC9B,qBACI,8OAAC;kBACG,cAAA,8OAAC;sBAAG;;;;;;;;;;;AAGhB","debugId":null}}]
+}
