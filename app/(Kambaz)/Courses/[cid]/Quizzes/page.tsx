@@ -13,7 +13,7 @@ import QuizControlButtons from "./QuizControlButtons";
 
 export default function Quizzes() {
   const [open, setOpen] = useState(false);
-  const toggleMenu = (e) => {
+  const toggleMenu = (e: { stopPropagation: () => void; }) => {
     e.stopPropagation();
     setOpen(!open);
   };  

@@ -1,5 +1,0 @@
-{
-  "/(Kambaz)/Account/Signin/page": "app/(Kambaz)/Account/Signin/page.js",
-  "/(Kambaz)/Account/Signup/page": "app/(Kambaz)/Account/Signup/page.js",
-  "/(Kambaz)/page": "app/(Kambaz)/page.js"
-}
