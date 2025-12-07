@@ -3,5 +3,5 @@
   "sources": [],
   "sections": [
     {"offset": {"line": 3, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
-    {"offset": {"line": 23, "column": 0}, "map": {"version":3,"sources":["file:///Users/meg/Documents/webdev-final-project/kambaz-quizzes-final-front-end/app/%28Kambaz%29/Courses/%5Bcid%5D/Quizzes/%5Baid%5D/DetailsEditor/page.tsx"],"sourcesContent":["export default function QuizEditor() {\n  return (\n    <div id=\"wd-quiz-editor\">\n      <h1 id=\"wd-quiz-editor-title\">Quiz Details Editor</h1> <hr />\n      </div>\n  )\n}"],"names":[],"mappings":";;;;;;AAAe,SAAS;IACtB,qBACE,8OAAC;QAAI,IAAG;;0BACN,8OAAC;gBAAG,IAAG;0BAAuB;;;;;;YAAwB;0BAAC,8OAAC;;;;;;;;;;;AAG9D","debugId":null}}]
+    {"offset": {"line": 23, "column": 0}, "map": {"version":3,"sources":["file:///Users/giaviolini/Desktop/webdev/kambaz-quizzes-final-front-end/app/%28Kambaz%29/Courses/%5Bcid%5D/Quizzes/%5Baid%5D/DetailsEditor/page.tsx"],"sourcesContent":["export default function QuizEditor() {\n  return (\n    <div id=\"wd-quiz-editor\">\n      <h1 id=\"wd-quiz-editor-title\">Quiz Details Editor</h1> <hr />\n      </div>\n  )\n}"],"names":[],"mappings":";;;;;;AAAe,SAAS;IACtB,qBACE,8OAAC;QAAI,IAAG;;0BACN,8OAAC;gBAAG,IAAG;0BAAuB;;;;;;YAAwB;0BAAC,8OAAC;;;;;;;;;;;AAG9D","debugId":null}}]
 }
