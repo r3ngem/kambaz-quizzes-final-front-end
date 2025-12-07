@@ -49,19 +49,26 @@ export default function Dashboard() {
     fetchCourses();
   }, [currentUser]);
 
+  const isFaculty = currentUser?.role === "FACULTY";
+  const isStudent = currentUser?.role === "STUDENT";
 
   return (
     <div id="wd-dashboard">
       <h1 id="wd-dashboard-title">Dashboard</h1> <hr />
 
       {/* Start of STUDENT only section */}
+      {isStudent &&(
+        <div>
         <Link href={`/Enrollment`} className="btn btn-primary" >
         Enroll in a Course</Link> <hr /><br />
-
+        </div>
+      )}
       {/* End of STUDENT only section */}
 
       {/* Start of FACULTY only section */}
 
+      {isFaculty && (
+        <div>
       <h5>New Course
           <button className="btn btn-primary float-end"
                   id="wd-add-new-course-click"
@@ -75,6 +82,8 @@ export default function Dashboard() {
         onChange={(e) => setCourse({ ...course, name: e.target.value }) } />
       <FormControl value={course.description} as="textarea"
         onChange={(e) => setCourse({ ...course, description: e.target.value }) } />
+      </div>
+      )}
 
       {/* End of FACULTY only section */}
 
@@ -95,7 +104,8 @@ export default function Dashboard() {
                       {course.description} </CardText>
                     <Button variant="primary"> Go </Button>
                     {/* Start of FACULTY only section */}
-
+                    {isFaculty && (
+                      <>
                     <Button onClick={(event) => {
                       event.preventDefault();
                       onDeleteCourse(course._id);
@@ -111,7 +121,8 @@ export default function Dashboard() {
                       className="btn btn-warning me-2 float-end" >
                       Edit
                     </Button>
-
+                    </>
+                    )}
                     {/* End of FACULTY only section */}
             
                   </CardBody>

@@ -547,30 +547,30 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib
 const axiosWithCredentials = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].create({
     withCredentials: true
 });
-const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER;
+const HTTP_SERVER = ("TURBOPACK compile-time value", "http://localhost:4000");
 const USERS_API = `${HTTP_SERVER}/api/users`;
 const findAllUsers = async ()=>{
     const response = await axiosWithCredentials.get(USERS_API);
     return response.data;
 };
 const findUsersByRole = async (role)=>{
-    const response = await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get(`${USERS_API}?role=${role}`);
+    const response = await axiosWithCredentials.get(`${USERS_API}?role=${role}`);
     return response.data;
 };
 const findUsersByPartialName = async (name)=>{
-    const response = await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get(`${USERS_API}?name=${name}`);
+    const response = await axiosWithCredentials.get(`${USERS_API}?name=${name}`);
     return response.data;
 };
 const findUserById = async (id)=>{
-    const response = await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].get(`${USERS_API}/${id}`);
+    const response = await axiosWithCredentials.get(`${USERS_API}/${id}`);
     return response.data;
 };
 const deleteUser = async (userId)=>{
-    const response = await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].delete(`${USERS_API}/${userId}`);
+    const response = await axiosWithCredentials.delete(`${USERS_API}/${userId}`);
     return response.data;
 };
 const createUser = async (user)=>{
-    const response = await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"].post(`${USERS_API}`, user);
+    const response = await axiosWithCredentials.post(`${USERS_API}`, user);
     return response.data;
 };
 const signin = async (credentials)=>{

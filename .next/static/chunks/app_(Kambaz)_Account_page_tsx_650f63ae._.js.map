@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///Users/meg/Documents/webdev-final-project/kambaz-quizzes-final-front-end/app/%28Kambaz%29/Account/page.tsx"],"sourcesContent":["/* eslint-disable @typescript-eslint/no-explicit-any */\n\"use client\";\nimport { useSelector } from \"react-redux\";\nimport { redirect } from \"next/dist/client/components/navigation\";\nimport { RootState } from \"../store\";\nexport default function AccountPage() {\n    const { currentUser } = useSelector((state: RootState) => state.accountReducer);\n if (!currentUser) {\n redirect(\"/Account/Signin\");\n} else {\n   redirect(\"/Account/Profile\");\n }\n}\n"],"names":[],"mappings":"AAAA,qDAAqD;;;;AAErD;AACA;;AAFA;;;AAIe,SAAS;;IACpB,MAAM,EAAE,WAAW,EAAE,GAAG,IAAA,2KAAW;mCAAC,CAAC,QAAqB,MAAM,cAAc;;IACjF,IAAI,CAAC,aAAa;QAClB,IAAA,iLAAQ,EAAC;IACV,OAAO;QACJ,IAAA,iLAAQ,EAAC;IACX;AACD;GAPwB;;QACI,2KAAW;;;KADf","debugId":null}}]
+}
