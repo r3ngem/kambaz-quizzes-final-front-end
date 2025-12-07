@@ -38,16 +38,25 @@ export default function Dashboard() {
 
 
   const fetchCourses = async () => {
-    try {
-      const courses = await client.findMyCourses();
-      dispatch(setCourses(courses));
-    } catch (error) {
-      console.error(error);
+  try {
+    let courses = await client.findMyCourses(); 
+
+    if (currentUser.role === "FACULTY") {
+      courses = courses.filter(c => c.creatorId === currentUser._id);
+    } else if (currentUser.role === "STUDENT") {
+      courses = courses.filter(c => currentUser.enrolledCourses?.includes(c._id));
     }
-  };
+
+    dispatch(setCourses(courses));
+  } catch (error) {
+    console.error(error);
+  }
+};
   useEffect(() => {
+  if (currentUser && currentUser._id) {
     fetchCourses();
-  }, [currentUser]);
+  }
+}, [currentUser]);
 
   const isFaculty = currentUser?.role === "FACULTY";
   const isStudent = currentUser?.role === "STUDENT";

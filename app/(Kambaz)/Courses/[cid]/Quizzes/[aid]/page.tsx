@@ -1,157 +1,75 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import { useParams } from "next/navigation";
-import { Button, Col, Row } from "react-bootstrap";
-import { LuPencil } from "react-icons/lu";
+import { Button, Col, Row, Spinner } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import * as client from "./DetailsEditor/client"; // API helper
+
+interface Quiz {
+  title: string;
+  type: string;
+  points: number;
+  assignmentGroup: string;
+  shuffleAnswers: boolean;
+  timeLimit: number;
+  multipleAttempts: boolean;
+  howManyAttempts: number;
+  showCorrectAnswers: string;
+  accessCode: string;
+  oneQuestionAtATime: boolean;
+  webcamRequired: boolean;
+  lockQuestionsAfterAnswering: boolean;
+  dueDate: string;
+  availableDate: string;
+  untilDate: string;
+}
 
 export default function QuizDetails() {
-    const { cid, aid } = useParams();
-    return (
+  const { cid, qid } = useParams();
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const [quiz, setQuiz] = useState<Quiz | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchQuiz = async () => {
+      try {
+        const data = await client.findQuiz(qid as string);
+        setQuiz(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchQuiz();
+  }, [cid, qid]);
+
+  if (!currentUser || loading) return <Spinner animation="border" />;
+
+  const isFaculty = currentUser.role === "FACULTY";
+  const isStudent = currentUser.role === "STUDENT";
+
+  return (
+    <div>
+      <h1>Quiz Details</h1>
+      <hr />
+
+      <div id="quiz-detail-button">
+        {isStudent && <Button variant="danger" href={`/Courses/${cid}/Quizzes/new/Preview`}>Start Quiz</Button>}
+        {isFaculty && <>
+          <Button variant="secondary" href={`/Courses/${cid}/Quizzes/new/Preview`}>Preview</Button>
+          <Button variant="secondary" href={`/Courses/${cid}/Quizzes/new/DetailsEditor`}>Edit</Button>
+        </>}
+      </div>
+
+      {isFaculty && quiz && (
         <div>
-            <h1> Quiz Details
-            </h1><hr />
-            <div id="quiz-detail-button">
-                {/*start button only for STUDENT view */}
-                <Button variant="danger" size="lg" className="me-1 float-start" id="wd-view-progress" 
-                    href={`/Courses/${cid}/Quizzes/new/Preview`}>Start Quiz
-                </Button>
-                {/*preview and edit button only for FACULTY view */}
-                <Button variant="secondary" 
-                size="lg" className="me-1 float-start" id="wd-collapse-all"
-                href={`/Courses/${cid}/Quizzes/new/Preview`}>
-                    Preview
-                </Button>
-                <Button variant="secondary" 
-                size="lg" className="me-1 float-start" id="wd-collapse-all"
-                href={`/Courses/${cid}/Quizzes/new/DetailsEditor`}>
-                    <LuPencil className="position-relative me-2" style={{ bottom: "1px" }} />
-                    Edit
-                </Button>
-            </div><br /><br /><hr />
-
-            <div>
-                <h1>Q1 - HTML</h1><br />
-                <Row>
-                    <Col className="ms-5 col text-end" xs={2}>
-                        <p><b>Quiz Type</b></p>
-                    </Col>
-                    <Col>
-                        <p>Graded Quiz</p>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col className="ms-5 col text-end" xs={2}>
-                    <p><b>Points</b></p>
-                    </Col>
-                    <Col>
-                        <p>29</p>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col className="ms-5 col text-end" xs={2}>
-                    <p><b>Assignment Group</b></p>
-                    </Col>
-                    <Col>
-                        <p>QUIZZES</p>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col className="ms-5 col text-end" xs={2}>
-                    <p><b>Shuffle Answers</b></p>
-                    </Col>
-                    <Col>
-                        <p>No</p>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col className="ms-5 col text-end" xs={2}>
-                    <p><b>Time Limit</b></p>
-                    </Col>
-                    <Col>
-                        <p>30 Minutes</p>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col className="ms-5 col text-end" xs={2}>
-                    <p><b>Multiple Attempts</b></p>
-                    </Col>
-                    <Col>
-                        <p>No</p>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col className="ms-5 col text-end" xs={2}>
-                    <p><b>How Many Attempts</b></p>
-                    </Col>
-                    <Col>
-                        <p>1</p>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col className="ms-5 col text-end" xs={2}>
-                    <p><b>Show Correct Answers</b></p>
-                    </Col>
-                    <Col>
-                        <p>Immediately</p>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col className="ms-5 col text-end" xs={2}>
-                    <p><b>Access Code</b></p>
-                    </Col>
-                    <Col>
-                        <p></p>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col className="ms-5 col text-end" xs={2}>
-                    <p><b>One Question at a Time</b></p>
-                    </Col>
-                    <Col>
-                        <p>Yes</p>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col className="ms-5 col text-end" xs={2}>
-                    <p><b>Webcam Required</b></p>
-                    </Col>
-                    <Col>
-                        <p>No</p>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col className="ms-5 col text-end" xs={2}>
-                    <p><b>Lock Questions After Answering</b></p>
-                    </Col>
-                    <Col>
-                        <p>No</p>
-                    </Col>
-                </Row>
-                <br /><br />
-                <Row>
-                    <Col className="ms-5" xs={2}>
-                    <p><b>Due</b></p>
-                    </Col>
-                    <Col>
-                        <p><b>Available From</b></p>
-                    </Col>
-                    <Col>
-                        <p><b>Until</b></p>
-                    </Col>
-                </Row>
-                <hr />
-                <Row>
-                    <Col className="ms-5" xs={2}>
-                    <p>Sep 21 at 1pm</p>
-                    </Col>
-                    <Col>
-                        <p>Sep 21 at 11:40am</p>
-                    </Col>
-                    <Col>
-                        <p>Sep 21 at 1pm</p>
-                    </Col>
-                </Row>
-            </div>
-
+          {Object.entries(quiz).map(([key, value]) => (
+            <Row key={key}><Col xs={4}><b>{key}</b></Col><Col>{String(value)}</Col></Row>
+          ))}
         </div>
-    )
+      )}
+    </div>
+  );
 }

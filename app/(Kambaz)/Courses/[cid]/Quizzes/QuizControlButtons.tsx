@@ -1,23 +1,42 @@
-import { useState } from "react";
+"use client"
+import { useState, MouseEvent } from "react";
 import GreenCheckmark from "../Assignments/GreenCheckmark";
 import { IoEllipsisVertical } from "react-icons/io5";
 import { Button } from "react-bootstrap";
 import { useParams } from "next/navigation";
 
-export default function QuizControlButtons() {
+interface Quiz {
+  _id: string;
+  title: string;
+  published: boolean;
+  points: number;
+  availableDate?: string;
+  dueDate?: string;
+  questions?: any[];
+}
+
+interface QuizControlButtonsProps {
+  quiz?: Quiz;
+}
+
+export default function QuizControlButtons({ quiz }: QuizControlButtonsProps) {
   const { cid } = useParams();
-    const [open, setOpen] = useState(false);
-  const toggleMenu = (e) => {
+  const [open, setOpen] = useState(false);
+
+  const toggleMenu = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     setOpen(!open);
-  };  
+  };
 
   const closeMenu = () => setOpen(false);
-    return (
-        <div className="float-end ms-auto">
-                <GreenCheckmark />
-                <div onClick={closeMenu} className = "float-end ms-auto">
-                <IoEllipsisVertical className="fs-4" size={22}
+
+  return (
+    <div className="float-end ms-auto">
+      <GreenCheckmark />
+      <div onClick={closeMenu} className="float-end ms-auto">
+        <IoEllipsisVertical
+          className="fs-4"
+          size={22}
           onClick={toggleMenu}
           style={{ cursor: "pointer" }}
         />
@@ -36,17 +55,13 @@ export default function QuizControlButtons() {
             }}
           >
             <div style={{ padding: "4px 8px", cursor: "pointer" }}>
-              <Button href={`/Courses/${cid}/Quizzes/new`}>Edit</Button>
+              <Button href={`/Courses/${cid}/Quizzes/${quiz?._id}`}>Edit</Button>
             </div>
-            <div style={{ padding: "4px 8px", cursor: "pointer" }}>
-              Delete
-            </div>
-            <div style={{ padding: "4px 8px", cursor: "pointer" }}>
-              Publish
-            </div>
+            <div style={{ padding: "4px 8px", cursor: "pointer" }}>Delete</div>
+            <div style={{ padding: "4px 8px", cursor: "pointer" }}>Publish</div>
           </div>
         )}
-                </div>
-              </div>
-    )
+      </div>
+    </div>
+  );
 }
