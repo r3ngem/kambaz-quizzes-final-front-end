@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import { useState, MouseEvent } from "react";
 import GreenCheckmark from "../Assignments/GreenCheckmark";
