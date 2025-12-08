@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import { useState, MouseEvent } from "react";
 import GreenCheckmark from "../Assignments/GreenCheckmark";
@@ -23,7 +24,7 @@ export default function QuizControlButtons({ quiz }: QuizControlButtonsProps) {
   const { cid } = useParams();
   const [open, setOpen] = useState(false);
 
-  const toggleMenu = (e: MouseEvent<HTMLDivElement>) => {
+  const toggleMenu = (e: { stopPropagation: () => void; }) => {
     e.stopPropagation();
     setOpen(!open);
   };
