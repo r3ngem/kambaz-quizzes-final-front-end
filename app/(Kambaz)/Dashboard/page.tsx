@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
@@ -42,9 +43,9 @@ export default function Dashboard() {
     let courses = await client.findMyCourses(); 
 
     if (currentUser.role === "FACULTY") {
-      courses = courses.filter(c => c.creatorId === currentUser._id);
+      courses = courses.filter((c: { creatorId: any; }) => c.creatorId === currentUser._id);
     } else if (currentUser.role === "STUDENT") {
-      courses = courses.filter(c => currentUser.enrolledCourses?.includes(c._id));
+      courses = courses.filter((c: { _id: any; }) => currentUser.enrolledCourses?.includes(c._id));
     }
 
     dispatch(setCourses(courses));
