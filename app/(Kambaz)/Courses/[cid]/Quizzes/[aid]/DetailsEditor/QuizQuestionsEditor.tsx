@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import { useRouter, useParams } from "next/navigation";
@@ -351,7 +352,7 @@ export default function QuizQuestionsEditor() {
       {/* Questions List */}
       {questions.length === 0 && !editingQuestion && (
         <div className="text-center p-5 border rounded">
-          <p className="text-muted">No questions yet. Click "New Question" to add one.</p>
+          <p className="text-muted">No questions yet. Click &quot;New Question&quot; to add one.</p>
         </div>
       )}
 

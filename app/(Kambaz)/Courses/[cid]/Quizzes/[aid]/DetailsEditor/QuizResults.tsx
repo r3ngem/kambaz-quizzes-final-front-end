@@ -238,7 +238,7 @@ export default function StudentQuizResults() {
       <div className="text-center p-5">
         <Alert variant="info">
           <h4>No Attempts Yet</h4>
-          <p>You haven't taken this quiz yet.</p>
+          <p>You haven&apos;t taken this quiz yet.</p>
           <Button variant="primary" onClick={handleRetakeQuiz}>
             Take Quiz
           </Button>
