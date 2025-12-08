@@ -26,9 +26,25 @@ export default function Profile() {
    dispatch(setCurrentUser(null));
    redirect("/Account/Signin");
  };
+ 
  useEffect(() => {
-   fetchProfile();
- }, []);
+  const fetchUser = async () => {
+    try {
+      const user = await client.profile();
+      dispatch(setCurrentUser(user));
+    } catch (error: any) {
+      // 401 means not logged in - this is normal, don't treat it as an error
+      if (error.response?.status === 401) {
+        console.log("User not logged in");
+        dispatch(setCurrentUser(null));
+      } else {
+        // Other errors should be logged
+        console.error("Error fetching user profile:", error);
+      }
+    }
+  };
+  fetchUser();
+}, [dispatch]);
 
   return (
     <div id="wd-profile-screen">

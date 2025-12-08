@@ -1,8 +1,10 @@
 import axios from "axios";
 
-const REMOTE_SERVER = process.env.REACT_APP_REMOTE_SERVER || "http://localhost:4000";
-const COURSES_API = `${REMOTE_SERVER}/api/courses`;
-const QUIZZES_API = `${REMOTE_SERVER}/api/quizzes`;
+axios.defaults.withCredentials = true;
+const axiosWithCredentials = axios.create({ withCredentials: true });
+const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER || "http://localhost:4000";
+const COURSES_API = `${HTTP_SERVER}/api/courses`;
+const QUIZZES_API = `${HTTP_SERVER}/api/quizzes`;
 
 // Get all quizzes for a specific course
 export const findQuizzesForCourse = async (courseId: string) => {
@@ -80,8 +82,6 @@ export const deleteQuestion = async (quizId: string, questionId: string) => {
   );
   return response.data;
 };
-
-// ============ QUIZ ATTEMPTS ============
 
 // Submit a quiz attempt
 export const submitQuizAttempt = async (quizId: string, attempt: any) => {

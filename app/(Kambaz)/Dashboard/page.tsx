@@ -42,9 +42,9 @@ export default function Dashboard() {
     let courses = await client.findMyCourses(); 
 
     if (currentUser.role === "FACULTY") {
-      courses = courses.filter(c => c.creatorId === currentUser._id);
+      courses = courses.filter((c: { creatorId: any; }) => c.creatorId === currentUser._id);
     } else if (currentUser.role === "STUDENT") {
-      courses = courses.filter(c => currentUser.enrolledCourses?.includes(c._id));
+      courses = courses.filter((c: { _id: any; }) => currentUser.enrolledCourses?.includes(c._id));
     }
 
     dispatch(setCourses(courses));
@@ -65,16 +65,12 @@ export default function Dashboard() {
     <div id="wd-dashboard">
       <h1 id="wd-dashboard-title">Dashboard</h1> <hr />
 
-      {/* Start of STUDENT only section */}
       {isStudent &&(
         <div>
         <Link href={`/Enrollment`} className="btn btn-primary" >
         Enroll in a Course</Link> <hr /><br />
         </div>
       )}
-      {/* End of STUDENT only section */}
-
-      {/* Start of FACULTY only section */}
 
       {isFaculty && (
         <div>
@@ -94,14 +90,13 @@ export default function Dashboard() {
       </div>
       )}
 
-      {/* End of FACULTY only section */}
 
       <h2 id="wd-dashboard-published">Published Courses ({courses.length})</h2> <hr />
       <div id="wd-dashboard-courses">
         <Row xs={1} md={5} className="g-4">
           {courses.map((course) => (
             // eslint-disable-next-line react/jsx-key
-            <Col className="wd-dashboard-course" style={{ width: "300px" }}>
+            <Col key={course._id} className="wd-dashboard-course" style={{ width: "300px" }}>
               <Card>
                 <Link href={`/Courses/${course._id}/Home`}
                       className="wd-dashboard-course-link text-decoration-none text-dark" >
