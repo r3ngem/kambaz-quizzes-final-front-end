@@ -46,59 +46,61 @@ export default function QuizEditor() {
   const [quiz, setQuiz] = useState<Quiz | null>(null);
 
   useEffect(() => {
-    // Make sure we have a course ID
-    if (!cid) return;
+    // Convert useParams values to strings safely
+    const courseId = Array.isArray(cid) ? cid[0] : cid;
+    const quizId = Array.isArray(qid) ? qid[0] : qid;
   
-    const initializeQuiz = async () => {
-      let courseQuizzes = quizzes;
+    if (!courseId) return; // safety check
   
-      // Fetch quizzes only if Redux doesn't have them
-      if (!quizzes || quizzes.length === 0) {
-        try {
-          courseQuizzes = await client.findQuizzesForCourse(cid as string);
-          dispatch(setQuizzes(courseQuizzes));
-        } catch (err) {
-          console.error("Failed to fetch quizzes:", err);
-          return;
+    const loadQuiz = async () => {
+      try {
+        // If quizzes not loaded, fetch them
+        if (!quizzes || quizzes.length === 0) {
+          const fetchedQuizzes = await client.findQuizzesForCourse(courseId);
+          dispatch(setQuizzes(fetchedQuizzes));
         }
-      }
   
-      // If qid exists, try to find the existing quiz
-      if (qid) {
-        const existingQuiz = courseQuizzes.find(q => q._id === qid);
-        if (existingQuiz) {
-          setQuiz({ ...existingQuiz, questions: existingQuiz.questions || [] });
-          return;
+        // If editing an existing quiz
+        if (quizId) {
+          const existingQuiz = quizzes?.find(q => q._id === quizId);
+          if (existingQuiz) {
+            setQuiz({ ...existingQuiz, questions: existingQuiz.questions || [] });
+            return;
+          }
         }
-      }
   
-      // If no qid or quiz not found → create new quiz
-      setQuiz({
-        title: "Unnamed Quiz",
-        description: "",
-        type: "Graded Quiz",
-        points: 0,
-        assignmentGroup: "Quizzes",
-        shuffleAnswers: true,
-        timeLimitMinutes: 20,
-        multipleAttempts: false,
-        howManyAttempts: 1,
-        showCorrectAnswers: "",
-        accessCode: "",
-        oneQuestionAtATime: true,
-        webcamRequired: false,
-        lockQuestionsAfterAnswering: false,
-        dueDate: "",
-        availableDate: "",
-        untilDate: "",
-        published: false,
-        courseId: cid as string,
-        questions: [],
-      });
+        // Otherwise, create a new quiz
+        setQuiz({
+          title: "Unnamed Quiz",
+          description: "",
+          type: "Graded Quiz",
+          points: 0,
+          assignmentGroup: "Quizzes",
+          shuffleAnswers: true,
+          timeLimitMinutes: 20,
+          multipleAttempts: false,
+          howManyAttempts: 1,
+          showCorrectAnswers: "",
+          accessCode: "",
+          oneQuestionAtATime: true,
+          webcamRequired: false,
+          lockQuestionsAfterAnswering: false,
+          dueDate: "",
+          availableDate: "",
+          untilDate: "",
+          published: false,
+          courseId,
+          questions: [],
+        });
+      } catch (err) {
+        console.error("Failed to load quiz:", err);
+        alert("Error loading quiz. Please try again.");
+      }
     };
   
-    initializeQuiz();
-  }, [qid, quizzes, cid, dispatch]);
+    loadQuiz();
+  }, [cid, qid, quizzes, dispatch]);
+  
   
   if (!quiz) return <p>Loading quiz...</p>;
 
