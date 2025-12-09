@@ -10,24 +10,14 @@ import * as client from "./client";
 import { setQuestions, addQuestion, updateQuestion, deleteQuestion } from "./reducer";
 import { FaPlus, FaTrash, FaPencilAlt } from "react-icons/fa";
 
-export default function QuizQuestionsEditor() {
-  const { cid, qid } = useParams();
-  const router = useRouter();
-  const dispatch = useDispatch();
-  const { questions } = useSelector((state: RootState) => state.quizReducer);
+interface QuizQuestionsEditorProps {
+  quiz: any;
+  setQuiz: (quiz: any) => void;
+}
+
+export default function QuizQuestionsEditor({ quiz, setQuiz }: QuizQuestionsEditorProps) {
   const [editingQuestion, setEditingQuestion] = useState<any>(null);
   const [isNewQuestion, setIsNewQuestion] = useState(false);
-
-  // Fetch questions for the quiz on component mount
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      if (qid) {
-        const fetchedQuestions = await client.findQuestionsForQuiz(qid as string);
-        dispatch(setQuestions(fetchedQuestions));
-      }
-    };
-    fetchQuestions();
-  }, [qid, dispatch]);
 
   const handleAddQuestion = () => {
     const newQuestion = {
@@ -42,14 +32,21 @@ export default function QuizQuestionsEditor() {
         { text: "Option 3", isCorrect: false },
         { text: "Option 4", isCorrect: false }
       ],
-      quiz: qid
     };
     setEditingQuestion(newQuestion);
     setIsNewQuestion(true);
   };
 
-  const handleEditQuestion = (question: any) => {
-    setEditingQuestion({ ...question });
+  const handleSaveQuestion = () => {
+    if (isNewQuestion) {
+      setQuiz({ ...quiz, questions: [...quiz.questions, editingQuestion] });
+    } else {
+      const updatedQuestions = quiz.questions.map((q: any) =>
+        q._id === editingQuestion._id ? editingQuestion : q
+      );
+      setQuiz({ ...quiz, questions: updatedQuestions });
+    }
+    setEditingQuestion(null);
     setIsNewQuestion(false);
   };
 
@@ -58,37 +55,25 @@ export default function QuizQuestionsEditor() {
     setIsNewQuestion(false);
   };
 
-  const handleSaveQuestion = async () => {
-    try {
-      if (isNewQuestion) {
-        const created = await client.createQuestionForQuiz(qid as string, editingQuestion);
-        dispatch(addQuestion(created));
-      } else {
-        const updated = await client.updateQuestion(qid as string, editingQuestion);
-        dispatch(updateQuestion(updated));
-      }
-      setEditingQuestion(null);
-      setIsNewQuestion(false);
-    } catch (error) {
-      console.error("Error saving question:", error);
-      alert("Failed to save question. Please try again.");
-    }
+  const handleEditQuestion = (question: any) => {
+    setEditingQuestion({ ...question });
+    setIsNewQuestion(false);
   };
-
-  const handleDeleteQuestion = async (questionId: string) => {
+  
+  const handleDeleteQuestion = (questionId: string) => {
     if (window.confirm("Are you sure you want to delete this question?")) {
-      try {
-        await client.deleteQuestion(qid as string, questionId);
-        dispatch(deleteQuestion(questionId));
-      } catch (error) {
-        console.error("Error deleting question:", error);
-        alert("Failed to delete question. Please try again.");
+      const updatedQuestions = quiz.questions.filter((q: any) => q._id !== questionId);
+      setQuiz({ ...quiz, questions: updatedQuestions });
+      // If currently editing this question, cancel editing
+      if (editingQuestion?._id === questionId) {
+        setEditingQuestion(null);
+        setIsNewQuestion(false);
       }
     }
   };
 
   // Calculate total points
-  const totalPoints = questions.reduce((sum: number, q: any) => sum + (q.points || 0), 0);
+  const totalPoints = quiz.questions?.reduce((sum: number, q: any) => sum + (q.points || 0), 0) || 0;
 
   // Render question editor based on type
   const renderQuestionEditor = () => {
@@ -350,13 +335,13 @@ export default function QuizQuestionsEditor() {
       {renderQuestionEditor()}
 
       {/* Questions List */}
-      {questions.length === 0 && !editingQuestion && (
+      {(quiz.questions?.length || 0) === 0 && !editingQuestion && (
         <div className="text-center p-5 border rounded">
           <p className="text-muted">No questions yet. Click &quot;New Question&quot; to add one.</p>
         </div>
       )}
 
-      {questions.map((question: any, index: number) => (
+      {quiz.questions?.map((question: any, index: number) => (
         <Card key={question._id} className="mb-3">
           <Card.Body>
             <div className="d-flex justify-content-between align-items-start">
