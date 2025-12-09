@@ -50,6 +50,7 @@ export const deleteQuiz = async (quizId: string) => {
 // Get quiz questions
 export const findQuestionsForQuiz = async (quizId: string) => {
   const response = await axiosWithCredentials.get(`${QUIZZES_API}/${quizId}/questions`);
+  console.log("Questions fetched:", response.data);  // <-- Add this HERE
   return response.data;
 };
 
