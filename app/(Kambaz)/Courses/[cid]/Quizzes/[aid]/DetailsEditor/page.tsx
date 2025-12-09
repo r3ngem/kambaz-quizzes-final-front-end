@@ -47,39 +47,40 @@ export default function QuizEditor() {
 
   // Load existing quiz or create new one
   useEffect(() => {
-    if (qid && quizzes.length > 0) {
+    if (!qid) {
+      // Creating new quiz
+      setQuiz({
+        title: "Unnamed Quiz",
+        description: "",
+        type: "Graded Quiz",
+        points: 0,
+        assignmentGroup: "Quizzes",
+        shuffleAnswers: true,
+        timeLimitMinutes: 20,
+        multipleAttempts: false,
+        howManyAttempts: 1,
+        showCorrectAnswers: "",
+        accessCode: "",
+        oneQuestionAtATime: true,
+        webcamRequired: false,
+        lockQuestionsAfterAnswering: false,
+        dueDate: "",
+        availableDate: "",
+        untilDate: "",
+        published: false,
+        courseId: cid as string,
+        questions: [],
+      });
+      return;
+    }
+  
+    // Editing existing quiz
+    if (quizzes.length > 0) {
       const existingQuiz = quizzes.find(q => q._id === qid);
       if (existingQuiz) {
-        setQuiz({
-          ...existingQuiz,
-          questions: existingQuiz.questions || [],
-        });
-        return;
+        setQuiz({ ...existingQuiz, questions: existingQuiz.questions || [] });
       }
     }
-    // New quiz
-    setQuiz({
-      title: "Unnamed Quiz",
-      description: "",
-      type: "Graded Quiz",
-      points: 0,
-      assignmentGroup: "Quizzes",
-      shuffleAnswers: true,
-      timeLimitMinutes: 20,
-      multipleAttempts: false,
-      howManyAttempts: 1,
-      showCorrectAnswers: "",
-      accessCode: "",
-      oneQuestionAtATime: true,
-      webcamRequired: false,
-      lockQuestionsAfterAnswering: false,
-      dueDate: "",
-      availableDate: "",
-      untilDate: "",
-      published: false,
-      courseId: cid as string,
-      questions: [],
-    });
   }, [qid, quizzes, cid]);
 
   if (!quiz) return <p>Loading quiz...</p>; // wait until quiz is loaded
@@ -139,7 +140,7 @@ export default function QuizEditor() {
           <div className="form-group mb-3">
             <FormControl 
               value={quiz.title} 
-              onChange={(e) => setQuiz({ ...quiz, title: e.target.value })} 
+              onChange={(e) => quiz && setQuiz({ ...quiz, title: e.target.value })}
               placeholder="Quiz Title"
             />
           </div>
@@ -423,7 +424,7 @@ export default function QuizEditor() {
         </Form>
       )}
       {/* Questions Tab */}
-      {activeTab === "questions" && ( 
+      {activeTab === "questions" && quiz && (
         <QuizQuestionsEditor quiz={quiz} setQuiz={setQuiz} />
       )}
 
