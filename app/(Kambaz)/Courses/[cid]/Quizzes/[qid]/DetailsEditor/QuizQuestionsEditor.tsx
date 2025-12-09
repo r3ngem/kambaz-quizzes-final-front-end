@@ -24,6 +24,7 @@ export default function QuizQuestionsEditor({ quiz, setQuiz }: QuizQuestionsEdit
       _id: `temp-${Date.now()}`,
       title: "New Question",
       type: "multiple-choice",
+      allowMultipleCorrect: false,
       points: 1,
       question: "",
       choices: [
@@ -180,6 +181,31 @@ export default function QuizQuestionsEditor({ quiz, setQuiz }: QuizQuestionsEdit
                 <FormLabel className="float-end">Choices</FormLabel>
               </Col>
               <Col xs={9}>
+              <Row className="mb-3">
+              <Col xs={3}>
+                <FormLabel className="float-end">Multiple Correct Answers</FormLabel>
+              </Col>
+              <Col xs={9}>
+                <Form.Check
+                  type="checkbox"
+                  label="Allow multiple correct answers"
+                  checked={editingQuestion.allowMultipleCorrect || false}
+                  onChange={(e) =>
+                    setEditingQuestion({
+                      ...editingQuestion,
+                      allowMultipleCorrect: e.target.checked,
+                      // If switching from multiple → single, keep only the first correct
+                      choices: e.target.checked
+                        ? editingQuestion.choices
+                        : editingQuestion.choices.map((c: any, i: number) => ({
+                            ...c,
+                            isCorrect: i === editingQuestion.choices.findIndex((ch: any) => ch.isCorrect),
+                          })),
+                    })
+                  }
+                />
+              </Col>
+            </Row>
                 {editingQuestion.choices?.map((choice: any, index: number) => (
                   <div key={index} className="mb-2 d-flex align-items-start">
                     <div className="me-2 mt-2">
