@@ -55,7 +55,7 @@ export default function QuizEditor() {
       // Fetch quizzes only if Redux doesn't have them
       if (!quizzes || quizzes.length === 0) {
         try {
-          courseQuizzes = await client.getQuizzesForCourse(cid as string);
+          courseQuizzes = await client.findQuizzesForCourse(cid as string);
           dispatch(setQuizzes(courseQuizzes));
         } catch (err) {
           console.error("Failed to fetch quizzes:", err);
@@ -100,9 +100,7 @@ export default function QuizEditor() {
     initializeQuiz();
   }, [qid, quizzes, cid, dispatch]);
   
-
-  
-  if (!quiz) return <p>Loading quiz...</p>; // wait until quiz is loaded
+  if (!quiz) return <p>Loading quiz...</p>;
 
   const handleSave = async (publish = false) => {
     try {
