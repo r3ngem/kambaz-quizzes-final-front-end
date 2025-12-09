@@ -99,7 +99,7 @@ export default function QuizList() {
       {quizzes.length === 0 ? (
         <div className="text-center p-5 text-muted">
           <p>No quizzes available.</p>
-          {isFaculty && <p>Click "+ Quiz" to create your first quiz.</p>}
+          {isFaculty && <p>Click &quot;+ Quiz&quot; to create your first quiz.</p>}
         </div>
       ) : (
         <ListGroup className="rounded-0">

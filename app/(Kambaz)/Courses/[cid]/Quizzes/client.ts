@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 
 axios.defaults.withCredentials = true;
@@ -7,9 +8,6 @@ const HTTP_SERVER = process.env.NEXT_PUBLIC_HTTP_SERVER || "http://localhost:400
 const COURSES_API = `${HTTP_SERVER}/api/courses`;
 const QUIZZES_API = `${HTTP_SERVER}/api/quizzes`;
 
-// =======================
-// QUIZ CRUD
-// =======================
 
 // Get all quizzes for a course
 export const findQuizzesForCourse = async (courseId: string) => {
@@ -50,10 +48,6 @@ export const togglePublish = async (quizId: string) => {
   return response.data;
 };
 
-// =======================
-// QUESTIONS
-// =======================
-
 // Get questions for a quiz
 export const findQuestionsForQuiz = async (quizId: string) => {
   const response = await axiosWithCredentials.get(`${QUIZZES_API}/${quizId}/questions`);
@@ -77,10 +71,6 @@ export const deleteQuestion = async (quizId: string, questionId: string) => {
   const response = await axiosWithCredentials.delete(`${QUIZZES_API}/${quizId}/questions/${questionId}`);
   return response.data;
 };
-
-// =======================
-// QUIZ ATTEMPTS
-// =======================
 
 // Submit an attempt
 export const submitQuizAttempt = async (quizId: string, attempt: any) => {
