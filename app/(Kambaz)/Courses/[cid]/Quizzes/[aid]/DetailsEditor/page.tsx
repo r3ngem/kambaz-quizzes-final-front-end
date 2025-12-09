@@ -206,12 +206,226 @@ export default function QuizEditor() {
             </Col>
           </Row>
 
-          {/* Additional options omitted for brevity, keep your original options here */}
+          {/* Options Section */}
+          <div className="border p-3 mb-3">
+            <h5>Options</h5>
+
+            {/* Shuffle Answers */}
+            <Row className="mb-3">
+              <Col xs={3}>
+                <FormLabel htmlFor="wd-shuffle-answers" className="float-end">Shuffle Answers</FormLabel>
+              </Col>
+              <Col xs={9}>
+                <FormSelect 
+                  id="wd-shuffle-answers"
+                  value={quiz.shuffleAnswers ? "Yes" : "No"}
+                  onChange={(e) => setQuiz({ ...quiz, shuffleAnswers: e.target.value === "Yes" })}
+                >
+                  <option>Yes</option>
+                  <option>No</option>
+                </FormSelect>
+              </Col>
+            </Row>
+
+            {/* Time Limit */}
+            <Row className="mb-3">
+              <Col xs={3}>
+                <FormLabel htmlFor="wd-time-limit" className="float-end">Time Limit</FormLabel>
+              </Col>
+              <Col xs={9}>
+                <InputGroup>
+                  <FormControl 
+                    id="wd-time-limit"
+                    type="number"
+                    value={quiz.timeLimitMinutes}
+                    onChange={(e) => setQuiz({ ...quiz, timeLimitMinutes: parseInt(e.target.value) || 20 })}
+                  />
+                  <InputGroupText>Minutes</InputGroupText>
+                </InputGroup>
+              </Col>
+            </Row>
+
+            {/* Multiple Attempts */}
+            <Row className="mb-3">
+              <Col xs={3}>
+                <FormLabel htmlFor="wd-multiple-attempts" className="float-end">Multiple Attempts</FormLabel>
+              </Col>
+              <Col xs={9}>
+                <FormSelect 
+                  id="wd-multiple-attempts"
+                  value={quiz.multipleAttempts ? "Yes" : "No"}
+                  onChange={(e) => setQuiz({ ...quiz, multipleAttempts: e.target.value === "Yes" })}
+                >
+                  <option>No</option>
+                  <option>Yes</option>
+                </FormSelect>
+              </Col>
+            </Row>
+
+            {/* How Many Attempts (only show if Multiple Attempts is Yes) */}
+            {quiz.multipleAttempts && (
+              <Row className="mb-3">
+                <Col xs={3}>
+                  <FormLabel htmlFor="wd-max-attempts" className="float-end">How Many Attempts</FormLabel>
+                </Col>
+                <Col xs={9}>
+                  <FormControl 
+                    id="wd-max-attempts"
+                    type="number"
+                    min="1"
+                    value={quiz.howManyAttempts || 1}
+                    onChange={(e) => setQuiz({ ...quiz, howManyAttempts: parseInt(e.target.value) || 1 })}
+                  />
+                </Col>
+              </Row>
+            )}
+
+            {/* Show Correct Answers */}
+            <Row className="mb-3">
+              <Col xs={3}>
+                <FormLabel htmlFor="wd-show-correct-answers" className="float-end">Show Correct Answers</FormLabel>
+              </Col>
+              <Col xs={9}>
+                <FormControl 
+                  id="wd-show-correct-answers"
+                  value={quiz.showCorrectAnswers}
+                  onChange={(e) => setQuiz({ ...quiz, showCorrectAnswers: e.target.value })}
+                  placeholder="e.g., Immediately after submission"
+                />
+              </Col>
+            </Row>
+
+            {/* Access Code */}
+            <Row className="mb-3">
+              <Col xs={3}>
+                <FormLabel htmlFor="wd-access-code" className="float-end">Access Code</FormLabel>
+              </Col>
+              <Col xs={9}>
+                <FormControl 
+                  id="wd-access-code"
+                  value={quiz.accessCode}
+                  onChange={(e) => setQuiz({ ...quiz, accessCode: e.target.value })}
+                  placeholder="Optional access code"
+                />
+              </Col>
+            </Row>
+
+            {/* One Question at a Time */}
+            <Row className="mb-3">
+              <Col xs={3}>
+                <FormLabel htmlFor="wd-one-question-at-time" className="float-end">One Question at a Time</FormLabel>
+              </Col>
+              <Col xs={9}>
+                <FormSelect 
+                  id="wd-one-question-at-time"
+                  value={quiz.oneQuestionAtATime ? "Yes" : "No"}
+                  onChange={(e) => setQuiz({ ...quiz, oneQuestionAtATime: e.target.value === "Yes" })}
+                >
+                  <option>Yes</option>
+                  <option>No</option>
+                </FormSelect>
+              </Col>
+            </Row>
+
+            {/* Webcam Required */}
+            <Row className="mb-3">
+              <Col xs={3}>
+                <FormLabel htmlFor="wd-webcam-required" className="float-end">Webcam Required</FormLabel>
+              </Col>
+              <Col xs={9}>
+                <FormSelect 
+                  id="wd-webcam-required"
+                  value={quiz.webcamRequired ? "Yes" : "No"}
+                  onChange={(e) => setQuiz({ ...quiz, webcamRequired: e.target.value === "Yes" })}
+                >
+                  <option>No</option>
+                  <option>Yes</option>
+                </FormSelect>
+              </Col>
+            </Row>
+
+            {/* Lock Questions After Answering */}
+            <Row className="mb-3">
+              <Col xs={3}>
+                <FormLabel htmlFor="wd-lock-questions" className="float-end">Lock Questions After Answering</FormLabel>
+              </Col>
+              <Col xs={9}>
+                <FormSelect 
+                  id="wd-lock-questions"
+                  value={quiz.lockQuestionsAfterAnswering ? "Yes" : "No"}
+                  onChange={(e) => setQuiz({ ...quiz, lockQuestionsAfterAnswering: e.target.value === "Yes" })}
+                >
+                  <option>No</option>
+                  <option>Yes</option>
+                </FormSelect>
+              </Col>
+            </Row>
+          </div>
+
+          {/* Assign Section */}
+          <div className="border p-3 mb-3">
+            <h5>Assign</h5>
+
+            {/* Assign To */}
+            <Row className="mb-3">
+              <FormLabel htmlFor="wd-assign-to"><b>Assign To</b></FormLabel>
+              <FormControl 
+                id="wd-assign-to" 
+                placeholder="Everyone" 
+                defaultValue="Everyone"
+              />
+            </Row>
+
+            {/* Due Date */}
+            <Row className="mb-3">
+              <Col>
+                <FormLabel htmlFor="wd-due-date"><b>Due</b></FormLabel>
+                <InputGroup>
+                  <FormControl 
+                    id="wd-due-date" 
+                    type="date"
+                    value={quiz.dueDate} 
+                    onChange={(e) => setQuiz({ ...quiz, dueDate: e.target.value })}
+                  />
+                  <InputGroupText><FaRegCalendarAlt /></InputGroupText>
+                </InputGroup>
+              </Col>
+            </Row>
+
+            {/* Available From and Until */}
+            <Row className="mb-3">
+              <Col>
+                <FormLabel htmlFor="wd-available-from"><b>Available from</b></FormLabel>
+                <InputGroup>
+                  <FormControl 
+                    id="wd-available-from" 
+                    type="date"
+                    value={quiz.availableDate} 
+                    onChange={(e) => setQuiz({ ...quiz, availableDate: e.target.value })}
+                  />
+                  <InputGroupText><FaRegCalendarAlt /></InputGroupText>
+                </InputGroup>
+              </Col>
+              <Col>
+                <FormLabel htmlFor="wd-available-until"><b>Until</b></FormLabel>
+                <InputGroup>
+                  <FormControl 
+                    id="wd-available-until" 
+                    type="date"
+                    value={quiz.untilDate}
+                    onChange={(e) => setQuiz({ ...quiz, untilDate: e.target.value })} 
+                  />
+                  <InputGroupText><FaRegCalendarAlt /></InputGroupText>
+                </InputGroup>
+              </Col>
+            </Row>
+          </div>
         </Form>
       )}
-
       {/* Questions Tab */}
-      {activeTab === "questions" && <QuizQuestionsEditor quiz={quiz} setQuiz={setQuiz} />}
+      {activeTab === "questions" && ( 
+        <QuizQuestionsEditor quiz={quiz} setQuiz={setQuiz} />
+      )}
 
       {/* Buttons */}
       <hr />
