@@ -116,3 +116,8 @@ export const findAllQuizAttempts = async (quizId: string) => {
   const response = await axios.get(`${QUIZZES_API}/${quizId}/attempts/all`);
   return response.data;
 };
+
+export async function getQuizzesForCourse(courseId: string) {
+  const res = await fetch(`/api/courses/${courseId}/quizzes`);
+  return res.json();
+}
