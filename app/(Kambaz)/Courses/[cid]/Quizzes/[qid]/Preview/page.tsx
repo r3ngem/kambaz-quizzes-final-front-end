@@ -9,6 +9,7 @@ import * as client from "../DetailsEditor/client";
 
 export default function QuizPreview() {
   const { cid, qid } = useParams();
+  const quizId = qid; 
   const router = useRouter();
   const { currentUser } = useSelector((state: RootState) => state.accountReducer);
   const [quiz, setQuiz] = useState<any>(null);
@@ -26,7 +27,6 @@ export default function QuizPreview() {
         if (qid) {
           const quizId = Array.isArray(qid) ? qid[0] : qid;
           const fetchedQuiz = await client.findQuiz(quizId);
-          console.log("quizId:", quizId);
           const fetchedQuestions = await client.findQuestionsForQuiz(quizId);
           console.log("Fetched Quiz:", fetchedQuiz);
           console.log("Fetched Questions:", fetchedQuestions);
