@@ -45,44 +45,44 @@ export default function QuizEditor() {
   const [activeTab, setActiveTab] = useState("details");
   const [quiz, setQuiz] = useState<Quiz | null>(null); // lazy init
 
-  // Load existing quiz or create new one
   useEffect(() => {
-    if (!qid) {
-      // Creating new quiz
-      setQuiz({
-        title: "Unnamed Quiz",
-        description: "",
-        type: "Graded Quiz",
-        points: 0,
-        assignmentGroup: "Quizzes",
-        shuffleAnswers: true,
-        timeLimitMinutes: 20,
-        multipleAttempts: false,
-        howManyAttempts: 1,
-        showCorrectAnswers: "",
-        accessCode: "",
-        oneQuestionAtATime: true,
-        webcamRequired: false,
-        lockQuestionsAfterAnswering: false,
-        dueDate: "",
-        availableDate: "",
-        untilDate: "",
-        published: false,
-        courseId: cid as string,
-        questions: [],
-      });
-      return;
-    }
+    if (!quizzes) return; // quizzes not loaded yet
   
-    // Editing existing quiz
-    if (quizzes.length > 0) {
+    if (qid) {
+      // Editing an existing quiz
       const existingQuiz = quizzes.find(q => q._id === qid);
       if (existingQuiz) {
         setQuiz({ ...existingQuiz, questions: existingQuiz.questions || [] });
+        return;
       }
     }
+  
+    // If no qid or quiz not found → new quiz
+    setQuiz({
+      title: "Unnamed Quiz",
+      description: "",
+      type: "Graded Quiz",
+      points: 0,
+      assignmentGroup: "Quizzes",
+      shuffleAnswers: true,
+      timeLimitMinutes: 20,
+      multipleAttempts: false,
+      howManyAttempts: 1,
+      showCorrectAnswers: "",
+      accessCode: "",
+      oneQuestionAtATime: true,
+      webcamRequired: false,
+      lockQuestionsAfterAnswering: false,
+      dueDate: "",
+      availableDate: "",
+      untilDate: "",
+      published: false,
+      courseId: cid as string,
+      questions: [],
+    });
   }, [qid, quizzes, cid]);
 
+  
   if (!quiz) return <p>Loading quiz...</p>; // wait until quiz is loaded
 
   const handleSave = async (publish = false) => {
