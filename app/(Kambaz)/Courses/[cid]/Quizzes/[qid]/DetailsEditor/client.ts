@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 axios.defaults.withCredentials = true;
 const axiosWithCredentials = axios.create({ withCredentials: true });
@@ -18,6 +17,9 @@ export const findQuizzesForCourse = async (courseId: string) => {
   console.log("Quizzes fetched:", response.data);
   return response.data;
 };
+
+// Alias for backwards compatibility (some files use this name)
+export const findQuizzesByCourse = findQuizzesForCourse;
 
 // Get a specific quiz by ID
 export const findQuiz = async (quizId: string) => {
