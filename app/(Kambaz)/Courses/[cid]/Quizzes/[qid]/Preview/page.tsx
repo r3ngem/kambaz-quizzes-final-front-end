@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { Button, Card, Form, Alert, ProgressBar } from "react-bootstrap";
