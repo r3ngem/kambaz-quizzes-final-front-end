@@ -61,11 +61,7 @@ export default function QuizPreview() {
   }, [isLoading, isFaculty, router, cid]);
 
   const handleAnswerChange = (questionId: string, answer: any) => {
-    setAnswers(prev => ({ ...prev, [questionId]: answer }));
-  };
-
-  const getQuestionId = (question: any): string => {
-    return question._id || question.id || `question-${questions.indexOf(question)}`;
+    setAnswers({ ...answers, [questionId]: answer });
   };
 
   const checkAnswer = (question: any, userAnswer: any) => {
@@ -102,10 +98,7 @@ export default function QuizPreview() {
   const handleSubmit = () => {
     let earnedScore = 0;
     questions.forEach((q) => {
-      const qId = getQuestionId(q);
-      if (checkAnswer(q, answers[qId])) {
-        earnedScore += Number(q.points) || 0; // Ensure points is a number
-      }
+      if (checkAnswer(q, answers[q._id])) earnedScore += q.points;
     });
     setScore(earnedScore);
     setShowResults(true);
@@ -122,8 +115,7 @@ export default function QuizPreview() {
   };
 
   const renderQuestion = (question: any, index: number) => {
-    const qId = getQuestionId(question);
-    const userAnswer = answers[qId];
+    const userAnswer = answers[question._id];
     const isCorrect = showResults ? checkAnswer(question, userAnswer) : null;
 
     return (
@@ -223,11 +215,8 @@ export default function QuizPreview() {
     );
   }
 
-  const totalPoints = questions.reduce((sum, q) => sum + (Number(q.points) || 0), 0);
-  
-  const answeredCount = Object.entries(answers).filter(
-    ([_, value]) => value !== undefined && value !== null && value !== ""
-  ).length;
+  const totalPoints = questions.reduce((sum, q) => sum + (q.points || 0), 0);
+  const answeredCount = Object.keys(answers).length;
 
   return (
     <div className="container mt-4">
