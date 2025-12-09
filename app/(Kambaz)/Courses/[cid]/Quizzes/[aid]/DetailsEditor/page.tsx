@@ -76,29 +76,33 @@ export default function QuizEditor() {
 
   const handleSave = async (publish = false) => {
     try {
-      // Prepare full quiz object
-      const quizToSave = { ...quiz, published: publish };
+      // Strip temp IDs from new questions
+      const questionsToSave = quiz.questions?.map(q => {
+        if (q._id?.startsWith("temp-")) {
+          const { _id, ...rest } = q;
+          return rest; // remove temp _id
+        }
+        return q;
+      });
+  
+      const quizToSave = { ...quiz, published: publish, questions: questionsToSave };
   
       let savedQuiz;
       if (quiz._id) {
         savedQuiz = await client.updateQuiz(quizToSave);
-        dispatch(updateQuiz(savedQuiz));
       } else {
         savedQuiz = await client.createQuizForCourse(cid as string, quizToSave);
-        dispatch(addQuiz(savedQuiz));
       }
-
-      // Navigate appropriately
-      if (publish) {
-        router.push(`/Courses/${cid}/Quizzes`);
-      } else {
-        router.push(`/Courses/${cid}/Quizzes/${savedQuiz._id}`);
-      }
+  
+      dispatch(quiz._id ? updateQuiz(savedQuiz) : addQuiz(savedQuiz));
+  
+      router.push(publish ? `/Courses/${cid}/Quizzes` : `/Courses/${cid}/Quizzes/${savedQuiz._id}`);
     } catch (err) {
       console.error("Failed to save quiz:", err);
       alert("Failed to save quiz. Please try again.");
     }
   };
+  
 
   const handleCancel = () => {
     router.push(`/Courses/${cid}/Quizzes`);
