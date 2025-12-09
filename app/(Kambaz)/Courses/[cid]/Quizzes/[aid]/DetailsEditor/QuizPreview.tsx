@@ -24,8 +24,11 @@ export default function QuizPreview() {
     const fetchQuizData = async () => {
       try {
         if (qid) {
-          const fetchedQuiz = await client.findQuiz(qid as string);
-          const fetchedQuestions = await client.findQuestionsForQuiz(qid as string);
+          const quizId = Array.isArray(qid) ? qid[0] : qid;
+          const fetchedQuiz = await client.findQuiz(quizId);
+          const fetchedQuestions = await client.findQuestionsForQuiz(quizId);
+          console.log("Fetched Quiz:", fetchedQuiz);
+          console.log("Fetched Questions:", fetchedQuestions);
           setQuiz(fetchedQuiz);
           setQuestions(fetchedQuestions);
           setIsLoading(false);
@@ -37,7 +40,7 @@ export default function QuizPreview() {
     };
     fetchQuizData();
   }, [qid]);
-
+  
   // Check if user is faculty
   const isFaculty = currentUser?.role === "FACULTY";
 
