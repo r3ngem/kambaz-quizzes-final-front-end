@@ -23,25 +23,26 @@ export default function QuizEditor() {
     current || {
       title: "Unnamed Quiz",
       description: "",
-      quizType: "Graded Quiz",
+      type: "Graded Quiz",               // was quizType
       points: 0,
       assignmentGroup: "Quizzes",
       shuffleAnswers: true,
-      timeLimit: 20,
+      timeLimitMinutes: 20,              // was timeLimit
       multipleAttempts: false,
-      maxAttempts: 1,
-      showCorrectAnswers: "",
+      howManyAttempts: 1,                 // was maxAttempts
+      showCorrectAnswers: "",             // keep string
       accessCode: "",
       oneQuestionAtATime: true,
       webcamRequired: false,
       lockQuestionsAfterAnswering: false,
-      dueDate: "",
+      dueDate: "",                        // strings are ok for <input type=date>
       availableDate: "",
       untilDate: "",
       published: false,
-      course: cid
+      courseId: cid                        // was course
     }
   );
+  
 
   // Fetch quizzes for the course on component mount
   useEffect(() => {
@@ -149,8 +150,8 @@ export default function QuizEditor() {
             <Col xs={9}>
               <FormSelect 
                 id="wd-quiz-type"
-                value={quiz.quizType}
-                onChange={(e) => setQuiz({ ...quiz, quizType: e.target.value })}
+                value={quiz.type}
+                onChange={(e) => setQuiz({ ...quiz, type: e.target.value })}
               >
                 <option>Graded Quiz</option>
                 <option>Practice Quiz</option>
@@ -225,8 +226,8 @@ export default function QuizEditor() {
                   <FormControl 
                     id="wd-time-limit"
                     type="number"
-                    value={quiz.timeLimit}
-                    onChange={(e) => setQuiz({ ...quiz, timeLimit: parseInt(e.target.value) || 20 })}
+                    value={quiz.timeLimitMinutes}
+                    onChange={(e) => setQuiz({ ...quiz, timeLimitMinutes: parseInt(e.target.value) || 20 })}
                   />
                   <InputGroupText>Minutes</InputGroupText>
                 </InputGroup>
@@ -261,8 +262,8 @@ export default function QuizEditor() {
                     id="wd-max-attempts"
                     type="number"
                     min="1"
-                    value={quiz.maxAttempts || 1}
-                    onChange={(e) => setQuiz({ ...quiz, maxAttempts: parseInt(e.target.value) || 1 })}
+                    value={quiz.howManyAttempts || 1}
+                    onChange={(e) => setQuiz({ ...quiz, howManyAttempts: parseInt(e.target.value) || 1 })}
                   />
                 </Col>
               </Row>
