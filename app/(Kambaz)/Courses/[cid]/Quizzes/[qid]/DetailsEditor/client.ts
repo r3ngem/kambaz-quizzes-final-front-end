@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
-
 axios.defaults.withCredentials = true;
 const axiosWithCredentials = axios.create({ withCredentials: true });
 
@@ -16,7 +15,7 @@ const QUIZZES_API = `${HTTP_SERVER}/api/quizzes`;
 // Get all quizzes for a specific course
 export const findQuizzesForCourse = async (courseId: string) => {
   const response = await axiosWithCredentials.get(`${COURSES_API}/${courseId}/quizzes`);
-  console.log("Quizzes fetched:", response.data);  // Debugging
+  console.log("Quizzes fetched:", response.data);
   return response.data;
 };
 
@@ -35,7 +34,7 @@ export const createQuizForCourse = async (courseId: string, quiz: any) => {
 // Update an existing quiz
 export const updateQuiz = async (quiz: any) => {
   const response = await axiosWithCredentials.put(`${QUIZZES_API}/${quiz._id}`, quiz);
-  return response.data; 
+  return response.data;
 };
 
 // Delete a quiz
