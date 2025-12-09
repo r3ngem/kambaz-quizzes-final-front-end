@@ -60,8 +60,29 @@ export default function QuizPreview() {
     }
   }, [isLoading, isFaculty, router, cid]);
 
-  const handleAnswerChange = (questionId: string, answer: any) => {
-    setAnswers({ ...answers, [questionId]: answer });
+  const handleAnswerChange = (question: any, choiceId: string | boolean) => {
+    if (question.allowMultipleCorrect) {
+      const currentAnswers = answers[question._id] || [];
+      if (currentAnswers.includes(choiceId)) {
+        // Remove choice if already selected
+        setAnswers({
+          ...answers,
+          [question._id]: currentAnswers.filter((id: string) => id !== choiceId),
+        });
+      } else {
+        // Add choice
+        setAnswers({
+          ...answers,
+          [question._id]: [...currentAnswers, choiceId],
+        });
+      }
+    } else {
+      // Single answer
+      setAnswers({
+        ...answers,
+        [question._id]: choiceId,
+      });
+    }
   };
 
   const checkAnswer = (question: any, userAnswer: any) => {
@@ -130,18 +151,16 @@ export default function QuizPreview() {
               return (
                 <div key={i} className={`mb-2 p-2 rounded ${showCorrect ? "bg-success bg-opacity-10 border border-success" : showIncorrect ? "bg-danger bg-opacity-10 border border-danger" : ""}`}>
                   <Form.Check
-                    type="radio"
+                    type={question.allowMultipleCorrect ? "checkbox" : "radio"}
                     id={`${question._id}-choice-${i}`}
                     name={`question-${question._id}`}
-                    label={
-                      <span>
-                        {choice.text}
-                        {showCorrect && <span className="text-success ms-2">✓ Correct</span>}
-                        {showIncorrect && <span className="text-danger ms-2">✗ Incorrect</span>}
-                      </span>
+                    label={choice.text}
+                    checked={
+                      question.allowMultipleCorrect
+                        ? (answers[question._id] || []).includes(choice._id)
+                        : answers[question._id] === choice._id
                     }
-                    checked={isSelected}
-                    onChange={() => handleAnswerChange(question._id, choice._id)} // ✅ store _id
+                    onChange={() => handleAnswerChange(question, choice._id)}
                     disabled={showResults}
                   />
                 </div>
