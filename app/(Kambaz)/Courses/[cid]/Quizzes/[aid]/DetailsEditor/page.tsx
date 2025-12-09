@@ -43,7 +43,7 @@ export default function QuizEditor() {
   const dispatch = useDispatch();
 
   const [activeTab, setActiveTab] = useState("details");
-  const [quiz, setQuiz] = useState<Quiz>(current || {
+  const [quiz, setQuiz] = useState<Quiz>({
     title: "Unnamed Quiz",
     description: "",
     type: "Graded Quiz",
@@ -66,17 +66,13 @@ export default function QuizEditor() {
     questions: [],
   });
   
-
-  // Fetch quizzes for the course on component mount
+  // update quiz state when quizzes are loaded
   useEffect(() => {
-    const fetchQuizzes = async () => {
-      if (cid) {
-        const fetchedQuizzes = await client.findQuizzesForCourse(cid as string);
-        dispatch(setQuizzes(fetchedQuizzes));
-      }
-    };
-    fetchQuizzes();
-  }, [cid, dispatch]);
+    if (qid && quizzes.length > 0) {
+      const current = quizzes.find((q: any) => q._id === qid);
+      if (current) setQuiz(current);
+    }
+  }, [qid, quizzes]);
 
   const handleSave = async (publish = false) => {
     try {
