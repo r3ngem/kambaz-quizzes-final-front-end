@@ -38,8 +38,7 @@ interface Quiz {
 export default function QuizEditor() {
   const { cid, qid } = useParams();
   const router = useRouter();
-  const { quizzes } = useSelector((state: RootState) => state.quizReducer);
-  const current = quizzes.find((q: any) => q._id === qid);
+  const { quizzes } = useSelector((state: RootState) => state.quizReducer) as { quizzes: Quiz[] };
   const dispatch = useDispatch();
 
   const [activeTab, setActiveTab] = useState("details");
@@ -69,10 +68,16 @@ export default function QuizEditor() {
   // update quiz state when quizzes are loaded
   useEffect(() => {
     if (qid && quizzes.length > 0) {
-      const current = quizzes.find((q: any) => q._id === qid);
-      if (current) setQuiz(current);
+      const existingQuiz = quizzes.find(q => q._id === qid);
+      if (existingQuiz) {
+        setQuiz({
+          ...existingQuiz,
+          questions: existingQuiz.questions || [],
+        });
+      }
     }
-  }, [qid, quizzes]);  
+  }, [qid, quizzes]);
+  
 
   const handleSave = async (publish = false) => {
     try {
