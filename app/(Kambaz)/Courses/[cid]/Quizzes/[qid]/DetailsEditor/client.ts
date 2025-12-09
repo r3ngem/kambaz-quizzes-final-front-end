@@ -16,6 +16,7 @@ const QUIZZES_API = `${HTTP_SERVER}/api/quizzes`;
 // Get all quizzes for a specific course
 export const findQuizzesForCourse = async (courseId: string) => {
   const response = await axiosWithCredentials.get(`${COURSES_API}/${courseId}/quizzes`);
+  console.log("Quizzes fetched:", response.data);  // Debugging
   return response.data;
 };
 
