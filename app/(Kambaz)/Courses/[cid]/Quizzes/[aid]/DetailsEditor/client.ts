@@ -34,7 +34,7 @@ export const createQuizForCourse = async (courseId: string, quiz: any) => {
 // Update an existing quiz
 export const updateQuiz = async (quiz: any) => {
   const response = await axiosWithCredentials.put(`${QUIZZES_API}/${quiz._id}`, quiz);
-  return response.data;
+  return response.data; 
 };
 
 // Delete a quiz
