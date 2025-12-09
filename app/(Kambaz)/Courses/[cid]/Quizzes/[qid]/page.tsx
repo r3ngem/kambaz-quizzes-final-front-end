@@ -92,7 +92,7 @@ export default function QuizPreview() {
   const handleNext = () => setCurrentQuestionIndex((i) => Math.min(i + 1, questions.length - 1));
   const handlePrevious = () => setCurrentQuestionIndex((i) => Math.max(i - 1, 0));
 
-  const handleEditQuiz = () => router.push(`/Courses/${quiz?.courseId}/Quizzes/${qid}/edit?tab=questions`);
+  const handleEditQuiz = () => router.push(`/Courses/${quiz?.courseId}/Quizzes/${qid}/questions`);
   const handleRetakeQuiz = () => {
     setAnswers({});
     setShowResults(false);
