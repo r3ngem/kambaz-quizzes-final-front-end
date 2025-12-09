@@ -5,7 +5,7 @@ import { Button, Card, Form, Alert, ProgressBar } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import { RootState } from "../../../../../store";
-import * as client from "./client";
+import * as client from "../DetailsEditor/client";
 
 export default function QuizPreview() {
   const { cid, qid } = useParams();
