@@ -21,8 +21,12 @@ export default function Dashboard() {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
 
   const onAddNewCourse = async () => {
-    const newCourse = await client.createCourse(course);
-    dispatch(setCourses([ ...courses, newCourse ]));
+    const newCourse = {
+    ...course,
+    creatorId: currentUser._id 
+  };
+    const savedCourse = await client.createCourse(newCourse);
+    dispatch(setCourses([ ...courses, savedCourse ]));
   };
 
   const onDeleteCourse = async (courseId: string) => {
