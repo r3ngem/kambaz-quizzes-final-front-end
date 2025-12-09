@@ -26,6 +26,7 @@ export default function QuizPreview() {
         if (qid) {
           const quizId = Array.isArray(qid) ? qid[0] : qid;
           const fetchedQuiz = await client.findQuiz(quizId);
+          console.log("quizId:", quizId);
           const fetchedQuestions = await client.findQuestionsForQuiz(quizId);
           console.log("Fetched Quiz:", fetchedQuiz);
           console.log("Fetched Questions:", fetchedQuestions);
