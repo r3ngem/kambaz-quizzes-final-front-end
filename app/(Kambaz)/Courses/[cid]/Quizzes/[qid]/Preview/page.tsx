@@ -65,21 +65,35 @@ export default function QuizPreview() {
   };
 
   const checkAnswer = (question: any, userAnswer: any) => {
-    if (!userAnswer) return false;
+    if (userAnswer === undefined || userAnswer === null) return false;
+  
     switch (question.type) {
-      case "multiple-choice":
+      case "multiple-choice": {
         const correctChoice = question.choices?.find((c: any) => c.isCorrect);
         return userAnswer === correctChoice?.text;
-      case "true-false":
-        return userAnswer === question.correctAnswer;
-      case "fill-blank":
-        return question.possibleAnswers?.some(
-          (ans: string) => ans.toLowerCase().trim() === userAnswer.toLowerCase().trim()
+      }
+  
+      case "true-false": {
+        // Normalize BOTH sides because backend may store strings
+        const correct = String(question.correctAnswer).toLowerCase().trim();
+        const user = String(userAnswer).toLowerCase().trim();
+        return user === correct;
+      }
+  
+      case "fill-blank": {
+        if (!question.possibleAnswers || question.possibleAnswers.length === 0) return false;
+  
+        const user = userAnswer.toLowerCase().trim();
+        return question.possibleAnswers.some(
+          (ans: string) => ans.toLowerCase().trim() === user
         );
+      }
+  
       default:
         return false;
     }
   };
+  
 
   const handleSubmit = () => {
     let earnedScore = 0;
