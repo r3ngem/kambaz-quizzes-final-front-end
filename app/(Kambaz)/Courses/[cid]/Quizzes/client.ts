@@ -8,32 +8,31 @@ const COURSES_API = `${HTTP_SERVER}/api/courses`;
 const QUIZZES_API = `${HTTP_SERVER}/api/quizzes`;
 
 // =======================
-// Quizzes
+// QUIZ CRUD
 // =======================
 
-// Get all quizzes for a specific course
+// Get all quizzes for a course
 export const findQuizzesForCourse = async (courseId: string) => {
   const response = await axiosWithCredentials.get(`${COURSES_API}/${courseId}/quizzes`);
-  console.log("Quizzes fetched:", response.data);
   return response.data;
 };
 
-// Alias for backwards compatibility
+// Alias for compatibility
 export const findQuizzesByCourse = findQuizzesForCourse;
 
-// Get a specific quiz by ID
+// Get a single quiz
 export const findQuiz = async (quizId: string) => {
   const response = await axiosWithCredentials.get(`${QUIZZES_API}/${quizId}`);
   return response.data;
 };
 
-// Create a new quiz for a course
+// Create a new quiz
 export const createQuizForCourse = async (courseId: string, quiz: any) => {
   const response = await axiosWithCredentials.post(`${COURSES_API}/${courseId}/quizzes`, quiz);
   return response.data;
 };
 
-// Update an existing quiz
+// Update a quiz
 export const updateQuiz = async (quiz: any) => {
   const response = await axiosWithCredentials.put(`${QUIZZES_API}/${quiz._id}`, quiz);
   return response.data;
@@ -45,17 +44,23 @@ export const deleteQuiz = async (quizId: string) => {
   return response.data;
 };
 
+// Toggle publish status
+export const togglePublish = async (quizId: string) => {
+  const response = await axiosWithCredentials.put(`${QUIZZES_API}/${quizId}/publish`);
+  return response.data;
+};
+
 // =======================
-// Questions
+// QUESTIONS
 // =======================
 
-// Get quiz questions
+// Get questions for a quiz
 export const findQuestionsForQuiz = async (quizId: string) => {
   const response = await axiosWithCredentials.get(`${QUIZZES_API}/${quizId}/questions`);
   return response.data;
 };
 
-// Create a new question for a quiz
+// Create a question
 export const createQuestionForQuiz = async (quizId: string, question: any) => {
   const response = await axiosWithCredentials.post(`${QUIZZES_API}/${quizId}/questions`, question);
   return response.data;
@@ -74,36 +79,29 @@ export const deleteQuestion = async (quizId: string, questionId: string) => {
 };
 
 // =======================
-// Quiz Attempts
+// QUIZ ATTEMPTS
 // =======================
 
-// Submit a quiz attempt
+// Submit an attempt
 export const submitQuizAttempt = async (quizId: string, attempt: any) => {
   const response = await axiosWithCredentials.post(`${QUIZZES_API}/${quizId}/attempts`, attempt);
   return response.data;
 };
 
-// Get all attempts for a quiz by current user
+// Get user's attempts
 export const findUserQuizAttempts = async (quizId: string) => {
   const response = await axiosWithCredentials.get(`${QUIZZES_API}/${quizId}/attempts`);
   return response.data;
 };
 
-// Get latest attempt for current user
+// Get latest attempt
 export const findLatestAttempt = async (quizId: string) => {
   const response = await axiosWithCredentials.get(`${QUIZZES_API}/${quizId}/attempts/latest`);
   return response.data;
 };
 
-// Get attempt count for current user
+// Get attempt count
 export const getAttemptCount = async (quizId: string) => {
   const response = await axiosWithCredentials.get(`${QUIZZES_API}/${quizId}/attempts/count`);
   return response.data;
 };
-
-// Get all attempts for a quiz (faculty only)
-export const findAllQuizAttempts = async (quizId: string) => {
-  const response = await axiosWithCredentials.get(`${QUIZZES_API}/${quizId}/attempts/all`);
-  return response.data;
-};
-

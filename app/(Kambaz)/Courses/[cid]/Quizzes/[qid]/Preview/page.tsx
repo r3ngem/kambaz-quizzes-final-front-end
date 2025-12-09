@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { Button, Card, Form, Alert, ProgressBar } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import * as client from "../DetailsEditor/client";
+import * as client from "../../client";
 
 export default function QuizPreview() {
   const { cid, qid } = useParams();
