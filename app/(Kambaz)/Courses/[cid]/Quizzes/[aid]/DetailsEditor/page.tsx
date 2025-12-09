@@ -101,7 +101,7 @@ export default function QuizEditor() {
       console.error("Failed to save quiz:", err);
       alert("Failed to save quiz. Please try again.");
     }
-  };
+  };  
   
 
   const handleCancel = () => {
