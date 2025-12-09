@@ -49,11 +49,12 @@ export default function Quizzes() {
     <div id="wd-quizzes">
       <h1 id="wd-quizzes-title">Quizzes</h1> <hr />
       {currentUser.role === "FACULTY" && (
-      <Button variant="danger" size="lg" className="me-1 float-end" id="wd-view-progress" 
-     href={`/Courses/${cid}/Quizzes/new`}>
-       <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
-       Quiz
-     </Button> )}
+        <Button 
+        variant="danger" 
+        size="lg" 
+        href={`/Courses/${cid}/Quizzes/new`} >
+        <FaPlus /> Quiz
+      </Button> )}
      <br /><br /><br />
 
      
