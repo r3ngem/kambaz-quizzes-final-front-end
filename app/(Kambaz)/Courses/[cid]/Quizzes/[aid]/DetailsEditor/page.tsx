@@ -11,6 +11,30 @@ import * as client from "./client";
 import { setQuizzes, addQuiz, updateQuiz } from "./reducer";
 import QuizQuestionsEditor from "./QuizQuestionsEditor";
 
+interface Quiz {
+  _id?: string;              // optional, because new quizzes won't have it yet
+  title: string;
+  description: string;
+  type: string;
+  points: number;
+  assignmentGroup: string;
+  shuffleAnswers: boolean;
+  timeLimitMinutes: number;
+  multipleAttempts: boolean;
+  howManyAttempts: number;
+  showCorrectAnswers: string;
+  accessCode: string;
+  oneQuestionAtATime: boolean;
+  webcamRequired: boolean;
+  lockQuestionsAfterAnswering: boolean;
+  dueDate: string;
+  availableDate: string;
+  untilDate: string;
+  published: boolean;
+  courseId: string;
+  questions?: any[];         // optional, array of questions
+}
+
 export default function QuizEditor() {
   const { cid, qid } = useParams();
   const router = useRouter();
@@ -19,29 +43,28 @@ export default function QuizEditor() {
   const dispatch = useDispatch();
 
   const [activeTab, setActiveTab] = useState("details");
-  const [quiz, setQuiz] = useState(
-    current || {
-      title: "Unnamed Quiz",
-      description: "",
-      type: "Graded Quiz",               // was quizType
-      points: 0,
-      assignmentGroup: "Quizzes",
-      shuffleAnswers: true,
-      timeLimitMinutes: 20,              // was timeLimit
-      multipleAttempts: false,
-      howManyAttempts: 1,                 // was maxAttempts
-      showCorrectAnswers: "",             // keep string
-      accessCode: "",
-      oneQuestionAtATime: true,
-      webcamRequired: false,
-      lockQuestionsAfterAnswering: false,
-      dueDate: "",                        // strings are ok for <input type=date>
-      availableDate: "",
-      untilDate: "",
-      published: false,
-      courseId: cid                        // was course
-    }
-  );
+  const [quiz, setQuiz] = useState<Quiz>(current || {
+    title: "Unnamed Quiz",
+    description: "",
+    type: "Graded Quiz",
+    points: 0,
+    assignmentGroup: "Quizzes",
+    shuffleAnswers: true,
+    timeLimitMinutes: 20,
+    multipleAttempts: false,
+    howManyAttempts: 1,
+    showCorrectAnswers: "",
+    accessCode: "",
+    oneQuestionAtATime: true,
+    webcamRequired: false,
+    lockQuestionsAfterAnswering: false,
+    dueDate: "",
+    availableDate: "",
+    untilDate: "",
+    published: false,
+    courseId: cid as string,
+    questions: [],
+  });
   
 
   // Fetch quizzes for the course on component mount
@@ -57,35 +80,28 @@ export default function QuizEditor() {
 
   const handleSave = async (publish = false) => {
     try {
+      // Prepare full quiz object
       const quizToSave = { ...quiz, published: publish };
-      
-      if (current) {
+  
+      let savedQuiz;
+      if (quiz._id) {
         // Update existing quiz
-        const updatedQuiz = await client.updateQuiz(quizToSave);
-        dispatch(updateQuiz(updatedQuiz));
-        
-        if (publish) {
-          // Navigate to Quiz List
-          router.push(`/Courses/${cid}/Quizzes`);
-        } else {
-          // Navigate to Quiz Details
-          router.push(`/Courses/${cid}/Quizzes/${qid}`);
-        }
+        savedQuiz = await client.updateQuiz(quizToSave);
+        dispatch(updateQuiz(savedQuiz));
       } else {
         // Create new quiz
-        const newQuiz = await client.createQuizForCourse(cid as string, quizToSave);
-        dispatch(addQuiz(newQuiz));
-        
-        if (publish) {
-          // Navigate to Quiz List
-          router.push(`/Courses/${cid}/Quizzes`);
-        } else {
-          // Navigate to Quiz Details
-          router.push(`/Courses/${cid}/Quizzes/${newQuiz._id}`);
-        }
+        savedQuiz = await client.createQuizForCourse(cid as string, quizToSave);
+        dispatch(addQuiz(savedQuiz));
       }
-    } catch (error) {
-      console.error("Error saving quiz:", error);
+  
+      // Navigate appropriately
+      if (publish) {
+        router.push(`/Courses/${cid}/Quizzes`);
+      } else {
+        router.push(`/Courses/${cid}/Quizzes/${savedQuiz._id}`);
+      }
+    } catch (err) {
+      console.error("Failed to save quiz:", err);
       alert("Failed to save quiz. Please try again.");
     }
   };
