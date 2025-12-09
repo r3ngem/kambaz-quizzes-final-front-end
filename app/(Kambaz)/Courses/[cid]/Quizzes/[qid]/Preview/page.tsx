@@ -68,31 +68,25 @@ export default function QuizPreview() {
     if (userAnswer === undefined || userAnswer === null) return false;
   
     switch (question.type) {
-      case "multiple-choice": {
+      case "multiple-choice":
         const correctChoice = question.choices?.find((c: any) => c.isCorrect);
-        return userAnswer === correctChoice?.text;
-      }
+        return userAnswer === correctChoice?._id;
   
-      case "true-false": {
-        // Normalize BOTH sides because backend may store strings
-        const correct = String(question.correctAnswer).toLowerCase().trim();
-        const user = String(userAnswer).toLowerCase().trim();
-        return user === correct;
-      }
+      case "true-false":
+        return String(userAnswer).toLowerCase().trim() === String(question.correctAnswer).toLowerCase().trim();
   
-      case "fill-blank": {
+      case "fill-blank":
         if (!question.possibleAnswers || question.possibleAnswers.length === 0) return false;
-  
         const user = userAnswer.toLowerCase().trim();
         return question.possibleAnswers.some(
           (ans: string) => ans.toLowerCase().trim() === user
         );
-      }
   
       default:
         return false;
     }
   };
+  
   
 
   const handleSubmit = () => {
@@ -117,7 +111,7 @@ export default function QuizPreview() {
   const renderQuestion = (question: any, index: number) => {
     const userAnswer = answers[question._id];
     const isCorrect = showResults ? checkAnswer(question, userAnswer) : null;
-
+  
     return (
       <Card key={question._id} className="mb-4">
         <Card.Body>
@@ -126,10 +120,11 @@ export default function QuizPreview() {
             <span className="badge bg-secondary">{question.points} pts</span>
           </div>
           <p className="mb-3"><strong>{question.question}</strong></p>
-
+  
+          {/* Multiple Choice */}
           {question.type === "multiple-choice" &&
             question.choices?.map((choice: any, i: number) => {
-              const isSelected = userAnswer === choice.text;
+              const isSelected = userAnswer === choice._id; // ✅ compare to stored id
               const showCorrect = showResults && choice.isCorrect;
               const showIncorrect = showResults && isSelected && !choice.isCorrect;
               return (
@@ -146,13 +141,14 @@ export default function QuizPreview() {
                       </span>
                     }
                     checked={isSelected}
-                    onChange={() => handleAnswerChange(question._id, choice.text)}
+                    onChange={() => handleAnswerChange(question._id, choice._id)} // ✅ store _id
                     disabled={showResults}
                   />
                 </div>
               );
             })}
-
+  
+          {/* True/False */}
           {question.type === "true-false" &&
             [true, false].map((value) => {
               const isSelected = userAnswer === value;
@@ -178,7 +174,8 @@ export default function QuizPreview() {
                 </div>
               );
             })}
-
+  
+          {/* Fill in the Blank */}
           {question.type === "fill-blank" && (
             <div>
               <Form.Control
@@ -191,7 +188,9 @@ export default function QuizPreview() {
               />
               {showResults && (
                 <Alert variant={isCorrect ? "success" : "danger"} className="mt-2 mb-0 py-2">
-                  {isCorrect ? "✓ Correct!" : `✗ Incorrect. Answers: ${question.possibleAnswers?.join(", ")}`}
+                  {isCorrect
+                    ? "✓ Correct!"
+                    : `✗ Incorrect. Acceptable answers: ${question.possibleAnswers?.join(", ")}`}
                 </Alert>
               )}
             </div>
@@ -200,6 +199,7 @@ export default function QuizPreview() {
       </Card>
     );
   };
+  
 
   if (isLoading) return <div className="text-center p-5">Loading quiz...</div>;
   if (!isFaculty) return null;
