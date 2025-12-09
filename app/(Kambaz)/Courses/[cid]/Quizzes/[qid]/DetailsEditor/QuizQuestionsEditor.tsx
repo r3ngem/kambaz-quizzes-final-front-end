@@ -209,18 +209,22 @@ export default function QuizQuestionsEditor({ quiz, setQuiz }: QuizQuestionsEdit
                 {editingQuestion.choices?.map((choice: any, index: number) => (
                   <div key={index} className="mb-2 d-flex align-items-start">
                     <div className="me-2 mt-2">
-                      <input
-                        type="radio"
-                        name="correct-answer"
-                        checked={choice.isCorrect}
-                        onChange={() => {
-                          const newChoices = editingQuestion.choices.map((c: any, i: number) => ({
-                            ...c,
-                            isCorrect: i === index
-                          }));
-                          setEditingQuestion({ ...editingQuestion, choices: newChoices });
-                        }}
-                      />
+                    <input
+                      type={editingQuestion.allowMultipleCorrect ? "checkbox" : "radio"}
+                      name="correct-answer"
+                      checked={choice.isCorrect}
+                      onChange={() => {
+                        const newChoices = [...editingQuestion.choices];
+                        if (editingQuestion.allowMultipleCorrect) {
+                          // Toggle individual choice
+                          newChoices[index].isCorrect = !newChoices[index].isCorrect;
+                        } else {
+                          // Only one correct answer
+                          newChoices.forEach((c, i) => (c.isCorrect = i === index));
+                        }
+                        setEditingQuestion({ ...editingQuestion, choices: newChoices });
+                      }}
+                    />
                     </div>
                     <FormControl
                       as="textarea"
