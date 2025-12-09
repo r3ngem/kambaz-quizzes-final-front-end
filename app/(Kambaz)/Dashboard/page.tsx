@@ -45,7 +45,7 @@ export default function Dashboard() {
     if (currentUser.role === "FACULTY") {
       courses = courses.filter((c: { creatorId: any; }) => c.creatorId === currentUser._id);
     } else if (currentUser.role === "STUDENT") {
-      courses = courses.filter((c: { _id: any; }) => currentUser.enrolledCourses?.includes(c._id));
+      courses = courses.filter((c: { _id: any; }) => currentUser.enrolledCourses?.includes(String(c._id)));
     }
 
     dispatch(setCourses(courses));
