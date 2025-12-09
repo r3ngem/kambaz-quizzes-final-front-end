@@ -27,10 +27,16 @@ export default function QuizPreview() {
 
   useEffect(() => {
     const fetchQuizData = async () => {
-      if (!quizId) return; // nothing to do if undefined
+      if (!quizId) {
+        console.log("No quizId found");
+        return;
+      }
+      console.log("Fetching quiz with ID:", quizId);
       try {
         const quizData = await client.findQuiz(quizId);
+        console.log("Quiz data received:", quizData);
         const questionsData = await client.findQuestionsForQuiz(quizId);
+        console.log("Questions data received:", questionsData);
         setQuiz(quizData);
         setQuestions(questionsData);
       } catch (err) {
@@ -42,7 +48,7 @@ export default function QuizPreview() {
   
     fetchQuizData();
   }, [quizId]);
-
+  
   // Redirect if not faculty
   useEffect(() => {
     if (!isLoading && !isFaculty) {
