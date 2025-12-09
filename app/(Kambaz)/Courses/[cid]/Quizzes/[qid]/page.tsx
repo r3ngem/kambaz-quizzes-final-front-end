@@ -197,8 +197,6 @@ export default function QuizPreview() {
       <div className="text-center p-5">
         <Alert variant="warning">
           <h4>Quiz Preview Not Available</h4>
-          <p>This quiz has no questions yet. Please add questions to preview the quiz.</p>
-          <Button variant="primary" onClick={handleEditQuiz}>Edit Quiz</Button>
         </Alert>
       </div>
     );
