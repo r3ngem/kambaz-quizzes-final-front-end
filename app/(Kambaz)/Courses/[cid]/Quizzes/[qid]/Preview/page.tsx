@@ -31,7 +31,6 @@ export default function QuizPreview() {
         const quizData = await client.findQuiz(quizId);
         console.log("Quiz data:", quizData);
         setQuiz(quizData);
-        // Questions are embedded in the quiz, but also try fetching separately
         if (quizData.questions && quizData.questions.length > 0) {
           setQuestions(quizData.questions);
         } else {
@@ -68,8 +67,9 @@ export default function QuizPreview() {
     if (!userAnswer) return false;
     switch (question.type) {
       case "multiple-choice":
-        const correctChoice = question.choices?.find((c: any) => c.isCorrect);
-        return userAnswer === correctChoice?.text;
+        return question.choices?.some(
+          (c: any) => c._id === userAnswer && c.isCorrect
+        );        
       case "true-false":
         return userAnswer === question.correctAnswer;
       case "fill-blank":
@@ -115,7 +115,7 @@ export default function QuizPreview() {
 
           {question.type === "multiple-choice" &&
             question.choices?.map((choice: any, i: number) => {
-              const isSelected = userAnswer === choice.text;
+              const isSelected =  userAnswer === choice._id;
               const showCorrect = showResults && choice.isCorrect;
               const showIncorrect = showResults && isSelected && !choice.isCorrect;
               return (
@@ -132,7 +132,7 @@ export default function QuizPreview() {
                       </span>
                     }
                     checked={isSelected}
-                    onChange={() => handleAnswerChange(question._id, choice.text)}
+                    onChange={() => handleAnswerChange(question._id, choice._id)}
                     disabled={showResults}
                   />
                 </div>
