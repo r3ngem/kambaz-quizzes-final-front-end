@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { Button, Col, Row, Spinner } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import * as client from "./DetailsEditor/client"; // API helper
+import * as client from "./DetailsEditor/client"; 
 
 interface Quiz {
   title: string;
