@@ -72,7 +72,7 @@ export default function QuizEditor() {
       const current = quizzes.find((q: any) => q._id === qid);
       if (current) setQuiz(current);
     }
-  }, [qid, quizzes]);
+  }, [qid, quizzes]);  
 
   const handleSave = async (publish = false) => {
     try {
@@ -81,15 +81,13 @@ export default function QuizEditor() {
   
       let savedQuiz;
       if (quiz._id) {
-        // Update existing quiz
         savedQuiz = await client.updateQuiz(quizToSave);
         dispatch(updateQuiz(savedQuiz));
       } else {
-        // Create new quiz
         savedQuiz = await client.createQuizForCourse(cid as string, quizToSave);
         dispatch(addQuiz(savedQuiz));
       }
-  
+
       // Navigate appropriately
       if (publish) {
         router.push(`/Courses/${cid}/Quizzes`);

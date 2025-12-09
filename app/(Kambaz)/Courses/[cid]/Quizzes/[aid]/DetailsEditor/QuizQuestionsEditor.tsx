@@ -38,14 +38,15 @@ export default function QuizQuestionsEditor({ quiz, setQuiz }: QuizQuestionsEdit
   };
 
   const handleSaveQuestion = () => {
-    if (isNewQuestion) {
-      setQuiz({ ...quiz, questions: [...quiz.questions, editingQuestion] });
-    } else {
-      const updatedQuestions = quiz.questions.map((q: any) =>
-        q._id === editingQuestion._id ? editingQuestion : q
-      );
-      setQuiz({ ...quiz, questions: updatedQuestions });
-    }
+    const updatedQuestions = isNewQuestion
+      ? [...quiz.questions, editingQuestion]
+      : quiz.questions.map((q: { _id: any; }) =>
+          q._id === editingQuestion._id ? editingQuestion : q
+        );
+  
+    const updatedQuiz = { ...quiz, questions: updatedQuestions };
+    setQuiz(updatedQuiz);
+  
     setEditingQuestion(null);
     setIsNewQuestion(false);
   };
