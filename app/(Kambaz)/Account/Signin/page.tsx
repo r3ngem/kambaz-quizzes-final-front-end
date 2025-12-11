@@ -31,7 +31,7 @@ export default function Signin() {
      <Button onClick={signin} id="wd-signin-btn" className="btn btn-primary w-100 mb-2"> 
      Sign in </Button>
      <Link href="Signup" id="wd-signup-link"> Sign up </Link>
-     <footer>
+     <footer className="footer">
       <p>Quizzes Final Project - Meghan Placob and Gia Violini</p>
       <p><a href="https://github.com/r3ngem/kambaz-quizzes-final-front-end">GitHub to Front End</a></p>
       <p><a href="https://github.com/r3ngem/kambaz-quizzes-final-back-end">GitHub to Back End</a></p>
