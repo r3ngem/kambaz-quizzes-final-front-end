@@ -148,12 +148,25 @@ export default function QuizPreview() {
     // Submit attempt for students
     if (isStudent && quizId) {
       try {
+        // Format answers to match schema: { question, answer, isCorrect, pointsEarned }
+        const formattedAnswers = questions.map((q) => {
+          const userAnswer = answers[q._id];
+          const isCorrect = checkAnswer(q, userAnswer);
+          return {
+            question: q._id,
+            answer: userAnswer,
+            isCorrect: isCorrect,
+            pointsEarned: isCorrect ? q.points : 0,
+          };
+        });
+
         const attempt = {
-          answers: answers,
+          answers: formattedAnswers,
           score: earnedScore,
           totalPoints: totalPoints,
           submittedAt: new Date().toISOString(),
         };
+        console.log("Submitting attempt:", attempt);
         await client.submitQuizAttempt(quizId, attempt);
         setAttemptCount(prev => prev + 1);
       } catch (err) {
