@@ -20,28 +20,44 @@ export default function QuizPreview() {
   const [showResults, setShowResults] = useState(false);
   const [score, setScore] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [attemptCount, setAttemptCount] = useState(0);
+  const [latestAttempt, setLatestAttempt] = useState<any>(null);
 
   const isFaculty = currentUser?.role === "FACULTY";
+  const isStudent = currentUser?.role === "STUDENT";
 
   useEffect(() => {
     const fetchQuizData = async () => {
       if (!quizId) return;
       try {
-        console.log("Fetching quiz:", quizId);
         const quizData = await client.findQuiz(quizId);
-        console.log("Quiz data:", quizData);
         setQuiz(quizData);
-        // Questions are embedded in the quiz, but also try fetching separately
+        
         if (quizData.questions && quizData.questions.length > 0) {
           setQuestions(quizData.questions);
         } else {
           try {
             const questionsData = await client.findQuestionsForQuiz(quizId);
-            console.log("Questions data:", questionsData);
             setQuestions(questionsData || []);
           } catch (err) {
             console.log("No separate questions endpoint, using embedded questions");
             setQuestions(quizData.questions || []);
+          }
+        }
+
+        // Fetch attempt data for students
+        if (currentUser?.role === "STUDENT") {
+          try {
+            const countData = await client.getAttemptCount(quizId);
+            setAttemptCount(countData.count || 0);
+            
+            const latest = await client.findLatestAttempt(quizId);
+            if (latest) {
+              setLatestAttempt(latest);
+            }
+          } catch (err) {
+            console.log("No previous attempts found");
           }
         }
       } catch (err) {
@@ -51,33 +67,33 @@ export default function QuizPreview() {
       }
     };
     fetchQuizData();
-  }, [quizId]);
+  }, [quizId, currentUser?.role]);
 
+  // Check if quiz is available for students
   useEffect(() => {
-    if (!isLoading && !isFaculty) {
-      alert("This preview is only available to faculty members.");
-      router.push(`/Courses/${cid}/Quizzes`);
+    if (!isLoading && isStudent && quiz) {
+      if (quiz.published === false) {
+        alert("This quiz is not yet available.");
+        router.push(`/Courses/${cid}/Quizzes`);
+      }
     }
-  }, [isLoading, isFaculty, router, cid]);
+  }, [isLoading, isStudent, quiz, router, cid]);
 
   const handleAnswerChange = (question: any, choiceId: string | boolean) => {
     if (question.allowMultipleCorrect) {
       const currentAnswers = answers[question._id] || [];
       if (currentAnswers.includes(choiceId)) {
-        // Remove choice if already selected
         setAnswers({
           ...answers,
           [question._id]: currentAnswers.filter((id: string) => id !== choiceId),
         });
       } else {
-        // Add choice
         setAnswers({
           ...answers,
           [question._id]: [...currentAnswers, choiceId],
         });
       }
     } else {
-      // Single answer
       setAnswers({
         ...answers,
         [question._id]: choiceId,
@@ -107,31 +123,85 @@ export default function QuizPreview() {
         return false;
     }
   };
-  
-  
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    // Check if student has exceeded allowed attempts
+    if (isStudent && quiz.multipleAttempts === false && attemptCount >= 1) {
+      alert("You have already used your only attempt for this quiz.");
+      return;
+    }
+    if (isStudent && quiz.allowedAttempts && attemptCount >= quiz.allowedAttempts) {
+      alert(`You have reached the maximum number of attempts (${quiz.allowedAttempts}).`);
+      return;
+    }
+
+    setIsSubmitting(true);
     let earnedScore = 0;
+    const totalPoints = questions.reduce((sum, q) => sum + (q.points || 0), 0);
+    
     questions.forEach((q) => {
       if (checkAnswer(q, answers[q._id])) earnedScore += q.points;
     });
+    
     setScore(earnedScore);
+
+    // Submit attempt for students
+    if (isStudent && quizId) {
+      try {
+        const attempt = {
+          answers: answers,
+          score: earnedScore,
+          totalPoints: totalPoints,
+          submittedAt: new Date().toISOString(),
+        };
+        await client.submitQuizAttempt(quizId, attempt);
+        setAttemptCount(prev => prev + 1);
+      } catch (err) {
+        console.error("Error submitting quiz attempt:", err);
+        alert("There was an error submitting your quiz. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
     setShowResults(true);
+    setIsSubmitting(false);
   };
 
   const handleNext = () => setCurrentQuestionIndex((i) => Math.min(i + 1, questions.length - 1));
   const handlePrevious = () => setCurrentQuestionIndex((i) => Math.max(i - 1, 0));
   const handleEditQuiz = () => router.push(`/Courses/${cid}/Quizzes/${qid}/DetailsEditor`);
+  const handleBackToQuizzes = () => router.push(`/Courses/${cid}/Quizzes`);
+  
   const handleRetakeQuiz = () => {
+    // Check if retake is allowed
+    if (isStudent) {
+      if (quiz.multipleAttempts === false) {
+        alert("Multiple attempts are not allowed for this quiz.");
+        return;
+      }
+      if (quiz.allowedAttempts && attemptCount >= quiz.allowedAttempts) {
+        alert(`You have reached the maximum number of attempts (${quiz.allowedAttempts}).`);
+        return;
+      }
+    }
     setAnswers({});
     setShowResults(false);
     setCurrentQuestionIndex(0);
     setScore(0);
   };
 
+  const canTakeQuiz = () => {
+    if (isFaculty) return true;
+    if (quiz.multipleAttempts === false && attemptCount >= 1) return false;
+    if (quiz.allowedAttempts && attemptCount >= quiz.allowedAttempts) return false;
+    return true;
+  };
+
   const renderQuestion = (question: any, index: number) => {
     const userAnswer = answers[question._id];
     const isCorrect = showResults ? checkAnswer(question, userAnswer) : null;
+    const showCorrectAnswers = isFaculty || (isStudent && quiz?.showCorrectAnswers !== false);
   
     return (
       <Card key={question._id} className="mb-4">
@@ -145,8 +215,8 @@ export default function QuizPreview() {
           {/* Multiple Choice */}
           {question.type === "multiple-choice" &&
             question.choices?.map((choice: any, i: number) => {
-              const isSelected = userAnswer === choice._id; // ✅ compare to stored id
-              const showCorrect = showResults && choice.isCorrect;
+              const isSelected = userAnswer === choice._id; 
+              const showCorrect = showResults && showCorrectAnswers && choice.isCorrect;
               const showIncorrect = showResults && isSelected && !choice.isCorrect;
               return (
                 <div key={i} className={`mb-2 p-2 rounded ${showCorrect ? "bg-success bg-opacity-10 border border-success" : showIncorrect ? "bg-danger bg-opacity-10 border border-danger" : ""}`}>
@@ -171,7 +241,7 @@ export default function QuizPreview() {
           {question.type === "true-false" &&
             [true, false].map((value) => {
               const isSelected = userAnswer === value;
-              const showCorrect = showResults && value === question.correctAnswer;
+              const showCorrect = showResults && showCorrectAnswers && value === question.correctAnswer;
               const showIncorrect = showResults && isSelected && value !== question.correctAnswer;
               return (
                 <div key={value.toString()} className={`mb-2 p-2 rounded ${showCorrect ? "bg-success bg-opacity-10 border border-success" : showIncorrect ? "bg-danger bg-opacity-10 border border-danger" : ""}`}>
@@ -187,7 +257,7 @@ export default function QuizPreview() {
                       </span>
                     }
                     checked={isSelected}
-                    onChange={() => handleAnswerChange(question._id, value)}
+                    onChange={() => handleAnswerChange(question, value)}
                     disabled={showResults}
                   />
                 </div>
@@ -201,15 +271,20 @@ export default function QuizPreview() {
                 type="text"
                 placeholder="Type your answer here"
                 value={userAnswer || ""}
-                onChange={(e) => handleAnswerChange(question._id, e.target.value)}
+                onChange={(e) => handleAnswerChange(question, e.target.value)}
                 disabled={showResults}
                 className={showResults ? (isCorrect ? "border-success" : "border-danger") : ""}
               />
-              {showResults && (
+              {showResults && showCorrectAnswers && (
                 <Alert variant={isCorrect ? "success" : "danger"} className="mt-2 mb-0 py-2">
                   {isCorrect
                     ? "✓ Correct!"
                     : `✗ Incorrect. Acceptable answers: ${question.possibleAnswers?.join(", ")}`}
+                </Alert>
+              )}
+              {showResults && !showCorrectAnswers && (
+                <Alert variant={isCorrect ? "success" : "danger"} className="mt-2 mb-0 py-2">
+                  {isCorrect ? "✓ Correct!" : "✗ Incorrect"}
                 </Alert>
               )}
             </div>
@@ -218,17 +293,20 @@ export default function QuizPreview() {
       </Card>
     );
   };
-  
 
   if (isLoading) return <div className="text-center p-5">Loading quiz...</div>;
-  if (!isFaculty) return null;
+  
   if (!quiz || questions.length === 0) {
     return (
       <div className="text-center p-5">
         <Alert variant="warning">
-          <h4>Quiz Preview Not Available</h4>
-          <p>No questions found for this quiz. Add questions in the editor first.</p>
-          <Button variant="primary" onClick={handleEditQuiz}>Go to Editor</Button>
+          <h4>Quiz Not Available</h4>
+          <p>{isFaculty ? "No questions found for this quiz. Add questions in the editor first." : "This quiz is not available at the moment."}</p>
+          {isFaculty ? (
+            <Button variant="primary" onClick={handleEditQuiz}>Go to Editor</Button>
+          ) : (
+            <Button variant="primary" onClick={handleBackToQuizzes}>Back to Quizzes</Button>
+          )}
         </Alert>
       </div>
     );
@@ -237,17 +315,52 @@ export default function QuizPreview() {
   const totalPoints = questions.reduce((sum, q) => sum + (q.points || 0), 0);
   const answeredCount = Object.keys(answers).length;
 
+  // Show previous attempt info for students who can't retake
+  if (isStudent && !canTakeQuiz() && !showResults) {
+    return (
+      <div className="container mt-4">
+        <h2>{quiz.title}</h2>
+        <Alert variant="info" className="mt-4">
+          <h4>Quiz Already Completed</h4>
+          <p>You have already completed this quiz.</p>
+          {latestAttempt && (
+            <p><strong>Your Score:</strong> {latestAttempt.score} / {latestAttempt.totalPoints} 
+              ({Math.round((latestAttempt.score / latestAttempt.totalPoints) * 100)}%)</p>
+          )}
+          <p>Attempts used: {attemptCount} / {quiz.allowedAttempts || 1}</p>
+          <Button variant="primary" onClick={handleBackToQuizzes}>Back to Quizzes</Button>
+        </Alert>
+      </div>
+    );
+  }
+
   return (
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
           <h2>{quiz.title}</h2>
-          <p className="text-muted mb-0">Faculty Preview Mode</p>
+          <p className="text-muted mb-0">
+            {isFaculty ? "Faculty Preview Mode" : `Welcome, ${currentUser?.firstName || "Student"}`}
+          </p>
+          {isStudent && (
+            <small className="text-muted">
+              Attempts: {attemptCount} / {quiz.allowedAttempts || (quiz.multipleAttempts === false ? 1 : "Unlimited")}
+            </small>
+          )}
         </div>
-        <Button variant="outline-primary" onClick={handleEditQuiz}>Edit Quiz</Button>
+        <div className="d-flex gap-2">
+          {isFaculty && (
+            <Button variant="outline-primary" onClick={handleEditQuiz}>Edit Quiz</Button>
+          )}
+          <Button variant="outline-secondary" onClick={handleBackToQuizzes}>Back to Quizzes</Button>
+        </div>
       </div>
 
-      {quiz.description && <Alert variant="info" className="mb-4"><strong>Instructions:</strong> {quiz.description}</Alert>}
+      {quiz.description && (
+        <Alert variant="info" className="mb-4">
+          <strong>Instructions:</strong> {quiz.description}
+        </Alert>
+      )}
 
       {!showResults && (
         <div className="mb-4">
@@ -270,11 +383,15 @@ export default function QuizPreview() {
         <div>
           {renderQuestion(questions[currentQuestionIndex], currentQuestionIndex)}
           <div className="d-flex justify-content-between mt-4">
-            <Button variant="secondary" onClick={handlePrevious} disabled={currentQuestionIndex === 0}>Previous</Button>
+            <Button variant="secondary" onClick={handlePrevious} disabled={currentQuestionIndex === 0}>
+              Previous
+            </Button>
             {currentQuestionIndex < questions.length - 1 ? (
               <Button variant="primary" onClick={handleNext}>Next</Button>
             ) : (
-              <Button variant="success" onClick={handleSubmit}>Submit Quiz</Button>
+              <Button variant="success" onClick={handleSubmit} disabled={isSubmitting}>
+                {isSubmitting ? "Submitting..." : "Submit Quiz"}
+              </Button>
             )}
           </div>
         </div>
@@ -283,13 +400,20 @@ export default function QuizPreview() {
           {questions.map((q, idx) => renderQuestion(q, idx))}
           {!showResults && (
             <div className="d-flex justify-content-end mt-4">
-              <Button variant="success" size="lg" onClick={handleSubmit}>Submit Quiz</Button>
+              <Button variant="success" size="lg" onClick={handleSubmit} disabled={isSubmitting}>
+                {isSubmitting ? "Submitting..." : "Submit Quiz"}
+              </Button>
             </div>
           )}
           {showResults && (
             <div className="d-flex justify-content-end gap-2 mt-4">
-              <Button variant="secondary" onClick={handleRetakeQuiz}>Retake</Button>
-              <Button variant="primary" onClick={handleEditQuiz}>Edit Quiz</Button>
+              {canTakeQuiz() && (
+                <Button variant="secondary" onClick={handleRetakeQuiz}>Retake</Button>
+              )}
+              {isFaculty && (
+                <Button variant="primary" onClick={handleEditQuiz}>Edit Quiz</Button>
+              )}
+              <Button variant="outline-secondary" onClick={handleBackToQuizzes}>Back to Quizzes</Button>
             </div>
           )}
         </div>
