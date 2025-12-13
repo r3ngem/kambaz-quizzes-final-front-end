@@ -1,13 +1,8 @@
 /* eslint-disable prefer-const */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
-import { useRouter, useParams } from "next/navigation";
 import { Button, Col, Form, FormControl, FormLabel, FormSelect, Row, Card } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
-import { useState, useEffect } from "react";
-import { RootState } from "../../../../../store";
-import * as client from "./client";
-import { setQuestions, addQuestion, updateQuestion, deleteQuestion } from "./reducer";
+import { useState } from "react";
 import { FaPlus, FaTrash, FaPencilAlt } from "react-icons/fa";
 
 interface QuizQuestionsEditorProps {
@@ -17,7 +12,7 @@ interface QuizQuestionsEditorProps {
 
 export default function QuizQuestionsEditor({ quiz, setQuiz }: QuizQuestionsEditorProps) {
   const [editingQuestion, setEditingQuestion] = useState<any>(null);
-  const [isNewQuestion, setIsNewQuestion] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   const handleAddQuestion = () => {
     const newQuestion = {
@@ -35,41 +30,50 @@ export default function QuizQuestionsEditor({ quiz, setQuiz }: QuizQuestionsEdit
       ],
     };
     setEditingQuestion(newQuestion);
-    setIsNewQuestion(true);
+    setEditingIndex(null); // null means it's a new question
   };
 
   const handleSaveQuestion = () => {
-    const updatedQuestions = isNewQuestion
-      ? [...quiz.questions, editingQuestion]
-      : quiz.questions.map((q: { _id: any; }) =>
-          q._id === editingQuestion._id ? editingQuestion : q
-        );
+    let updatedQuestions;
+    
+    if (editingIndex === null) {
+      // Adding new question
+      updatedQuestions = [...(quiz.questions || []), editingQuestion];
+    } else {
+      // Updating existing question by index
+      updatedQuestions = quiz.questions.map((q: any, idx: number) =>
+        idx === editingIndex ? editingQuestion : q
+      );
+    }
   
     const updatedQuiz = { ...quiz, questions: updatedQuestions };
     setQuiz(updatedQuiz);
   
     setEditingQuestion(null);
-    setIsNewQuestion(false);
+    setEditingIndex(null);
   };
 
   const handleCancelEdit = () => {
     setEditingQuestion(null);
-    setIsNewQuestion(false);
+    setEditingIndex(null);
   };
 
-  const handleEditQuestion = (question: any) => {
+  const handleEditQuestion = (question: any, index: number) => {
     setEditingQuestion({ ...question });
-    setIsNewQuestion(false);
+    setEditingIndex(index);
   };
   
-  const handleDeleteQuestion = (questionId: string) => {
+  const handleDeleteQuestion = (index: number) => {
     if (window.confirm("Are you sure you want to delete this question?")) {
-      const updatedQuestions = quiz.questions.filter((q: any) => q._id !== questionId);
+      const updatedQuestions = quiz.questions.filter((_: any, i: number) => i !== index);
       setQuiz({ ...quiz, questions: updatedQuestions });
       // If currently editing this question, cancel editing
-      if (editingQuestion?._id === questionId) {
+      if (editingIndex === index) {
         setEditingQuestion(null);
-        setIsNewQuestion(false);
+        setEditingIndex(null);
+      } else if (editingIndex !== null && editingIndex > index) {
+        // Adjust index if we deleted a question before the one being edited
+        setEditingIndex(editingIndex - 1);
       }
     }
   };
@@ -105,16 +109,19 @@ export default function QuizQuestionsEditor({ quiz, setQuiz }: QuizQuestionsEdit
                       { text: "Option 3", isCorrect: false },
                       { text: "Option 4", isCorrect: false }
                     ];
+                    updatedQuestion.allowMultipleCorrect = false;
                     delete updatedQuestion.correctAnswer;
                     delete updatedQuestion.possibleAnswers;
                   } else if (newType === "true-false") {
                     updatedQuestion.correctAnswer = true;
                     delete updatedQuestion.choices;
                     delete updatedQuestion.possibleAnswers;
+                    delete updatedQuestion.allowMultipleCorrect;
                   } else if (newType === "fill-blank") {
                     updatedQuestion.possibleAnswers = [""];
                     delete updatedQuestion.choices;
                     delete updatedQuestion.correctAnswer;
+                    delete updatedQuestion.allowMultipleCorrect;
                   }
                   
                   setEditingQuestion(updatedQuestion);
@@ -181,50 +188,47 @@ export default function QuizQuestionsEditor({ quiz, setQuiz }: QuizQuestionsEdit
                 <FormLabel className="float-end">Choices</FormLabel>
               </Col>
               <Col xs={9}>
-              <Row className="mb-3">
-              <Col xs={3}>
-                <FormLabel className="float-end">Multiple Correct Answers</FormLabel>
-              </Col>
-              <Col xs={9}>
-                <Form.Check
-                  type="checkbox"
-                  label="Allow multiple correct answers"
-                  checked={editingQuestion.allowMultipleCorrect || false}
-                  onChange={(e) =>
-                    setEditingQuestion({
-                      ...editingQuestion,
-                      allowMultipleCorrect: e.target.checked,
-                      // If switching from multiple → single, keep only the first correct
-                      choices: e.target.checked
-                        ? editingQuestion.choices
-                        : editingQuestion.choices.map((c: any, i: number) => ({
-                            ...c,
-                            isCorrect: i === editingQuestion.choices.findIndex((ch: any) => ch.isCorrect),
-                          })),
-                    })
-                  }
-                />
-              </Col>
-            </Row>
+                <Row className="mb-3">
+                  <Col xs={12}>
+                    <Form.Check
+                      type="checkbox"
+                      label="Allow multiple correct answers"
+                      checked={editingQuestion.allowMultipleCorrect || false}
+                      onChange={(e) =>
+                        setEditingQuestion({
+                          ...editingQuestion,
+                          allowMultipleCorrect: e.target.checked,
+                          // If switching from multiple → single, keep only the first correct
+                          choices: e.target.checked
+                            ? editingQuestion.choices
+                            : editingQuestion.choices.map((c: any, i: number) => ({
+                                ...c,
+                                isCorrect: i === editingQuestion.choices.findIndex((ch: any) => ch.isCorrect),
+                              })),
+                        })
+                      }
+                    />
+                  </Col>
+                </Row>
                 {editingQuestion.choices?.map((choice: any, index: number) => (
                   <div key={index} className="mb-2 d-flex align-items-start">
                     <div className="me-2 mt-2">
-                    <input
-                      type={editingQuestion.allowMultipleCorrect ? "checkbox" : "radio"}
-                      name="correct-answer"
-                      checked={choice.isCorrect}
-                      onChange={() => {
-                        const newChoices = [...editingQuestion.choices];
-                        if (editingQuestion.allowMultipleCorrect) {
-                          // Toggle individual choice
-                          newChoices[index].isCorrect = !newChoices[index].isCorrect;
-                        } else {
-                          // Only one correct answer
-                          newChoices.forEach((c, i) => (c.isCorrect = i === index));
-                        }
-                        setEditingQuestion({ ...editingQuestion, choices: newChoices });
-                      }}
-                    />
+                      <input
+                        type={editingQuestion.allowMultipleCorrect ? "checkbox" : "radio"}
+                        name="correct-answer"
+                        checked={choice.isCorrect}
+                        onChange={() => {
+                          const newChoices = [...editingQuestion.choices];
+                          if (editingQuestion.allowMultipleCorrect) {
+                            // Toggle individual choice
+                            newChoices[index].isCorrect = !newChoices[index].isCorrect;
+                          } else {
+                            // Only one correct answer
+                            newChoices.forEach((c, i) => (c.isCorrect = i === index));
+                          }
+                          setEditingQuestion({ ...editingQuestion, choices: newChoices });
+                        }}
+                      />
                     </div>
                     <FormControl
                       as="textarea"
@@ -294,9 +298,12 @@ export default function QuizQuestionsEditor({ quiz, setQuiz }: QuizQuestionsEdit
           {editingQuestion.type === "fill-blank" && (
             <Row className="mb-3">
               <Col xs={3}>
-                <FormLabel className="float-end">Possible Answers</FormLabel>
+                <FormLabel className="float-end">Required Answers</FormLabel>
               </Col>
               <Col xs={9}>
+                <p className="text-muted small mb-2">
+                  Add all answers that the student must provide (they will enter them comma-separated)
+                </p>
                 {editingQuestion.possibleAnswers?.map((answer: string, index: number) => (
                   <div key={index} className="mb-2 d-flex">
                     <FormControl
@@ -306,7 +313,7 @@ export default function QuizQuestionsEditor({ quiz, setQuiz }: QuizQuestionsEdit
                         newAnswers[index] = e.target.value;
                         setEditingQuestion({ ...editingQuestion, possibleAnswers: newAnswers });
                       }}
-                      placeholder={`Correct answer ${index + 1}`}
+                      placeholder={`Required answer ${index + 1}`}
                     />
                     <Button
                       variant="danger"
@@ -342,7 +349,7 @@ export default function QuizQuestionsEditor({ quiz, setQuiz }: QuizQuestionsEdit
               Cancel
             </Button>
             <Button variant="danger" onClick={handleSaveQuestion}>
-              {isNewQuestion ? "Save Question" : "Update Question"}
+              {editingIndex === null ? "Add Question" : "Update Question"}
             </Button>
           </div>
         </Form>
@@ -373,7 +380,7 @@ export default function QuizQuestionsEditor({ quiz, setQuiz }: QuizQuestionsEdit
       )}
 
       {quiz.questions?.map((question: any, index: number) => (
-        <Card key={question._id} className="mb-3">
+        <Card key={question._id || `question-${index}`} className="mb-3">
           <Card.Body>
             <div className="d-flex justify-content-between align-items-start">
               <div className="flex-grow-1">
@@ -382,9 +389,10 @@ export default function QuizQuestionsEditor({ quiz, setQuiz }: QuizQuestionsEdit
                   <span className="badge bg-secondary ms-2 fs-6">{question.points} pts</span>
                 </h5>
                 <p className="text-muted mb-2">
-                  Type: {question.type === "multiple-choice" ? "Multiple Choice" : 
-                         question.type === "true-false" ? "True/False" : 
-                         "Fill in the Blank"}
+                  Type: {question.type === "multiple-choice" 
+                    ? (question.allowMultipleCorrect ? "Multiple Choice (Multiple Answers)" : "Multiple Choice")
+                    : question.type === "true-false" ? "True/False" 
+                    : "Fill in the Blank"}
                 </p>
                 <p>{question.question}</p>
 
@@ -393,7 +401,12 @@ export default function QuizQuestionsEditor({ quiz, setQuiz }: QuizQuestionsEdit
                   <div className="ms-3">
                     {question.choices?.map((choice: any, i: number) => (
                       <div key={i} className="mb-1">
-                        <input type="radio" disabled checked={choice.isCorrect} className="me-2" />
+                        <input 
+                          type={question.allowMultipleCorrect ? "checkbox" : "radio"} 
+                          disabled 
+                          checked={choice.isCorrect} 
+                          className="me-2" 
+                        />
                         {choice.text}
                         {choice.isCorrect && <span className="text-success ms-2">(Correct)</span>}
                       </div>
@@ -409,7 +422,7 @@ export default function QuizQuestionsEditor({ quiz, setQuiz }: QuizQuestionsEdit
 
                 {question.type === "fill-blank" && (
                   <div className="ms-3">
-                    <p><strong>Possible Answers:</strong></p>
+                    <p><strong>Required Answers:</strong></p>
                     <ul>
                       {question.possibleAnswers?.map((answer: string, i: number) => (
                         <li key={i}>{answer}</li>
@@ -423,14 +436,16 @@ export default function QuizQuestionsEditor({ quiz, setQuiz }: QuizQuestionsEdit
                 <Button
                   variant="outline-primary"
                   size="sm"
-                  onClick={() => handleEditQuestion(question)}
+                  onClick={() => handleEditQuestion(question, index)}
+                  disabled={editingQuestion !== null}
                 >
                   <FaPencilAlt /> Edit
                 </Button>
                 <Button
                   variant="outline-danger"
                   size="sm"
-                  onClick={() => handleDeleteQuestion(question._id)}
+                  onClick={() => handleDeleteQuestion(index)}
+                  disabled={editingQuestion !== null}
                 >
                   <FaTrash /> Delete
                 </Button>
