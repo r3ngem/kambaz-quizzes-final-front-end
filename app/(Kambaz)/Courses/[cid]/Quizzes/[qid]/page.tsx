@@ -83,7 +83,8 @@ export default function QuizDetails() {
           <Button 
             variant="danger" 
             size="lg"
-            onClick={() => router.push(`/Courses/${cid}/Quizzes/${qid}/take`)}
+            onClick={() => 
+              router.push(`/Courses/${cid}/Quizzes/${qid}/take`)}
           >
             Start Quiz
           </Button>

@@ -162,8 +162,8 @@ export default function QuizPreview() {
       alert("You have already used your only attempt for this quiz.");
       return;
     }
-    if (isStudent && quiz.allowedAttempts && attemptCount >= quiz.allowedAttempts) {
-      alert(`You have reached the maximum number of attempts (${quiz.allowedAttempts}).`);
+    if (isStudent && quiz.howManyAttempts && attemptCount >= quiz.howManyAttempts) {
+      alert(`You have reached the maximum number of attempts (${quiz.howManyAttempts}).`);
       return;
     }
 
@@ -227,8 +227,8 @@ export default function QuizPreview() {
         alert("Multiple attempts are not allowed for this quiz.");
         return;
       }
-      if (quiz.multipleAttempts && attemptCount >= quiz.allowedAttempts) {
-        alert(`You have reached the maximum number of attempts (${quiz.allowedAttempts}).`);
+      if (quiz.multipleAttempts && attemptCount >= quiz.howManyAttempts) {
+        alert(`You have reached the maximum number of attempts (${quiz.howManyAttempts}).`);
         return;
       }
     }
@@ -241,7 +241,7 @@ export default function QuizPreview() {
   const canTakeQuiz = () => {
     if (isFaculty) return true;
     if (quiz.multipleAttempts === false && attemptCount >= 1) return false;
-    if (quiz.multipleAttempts && attemptCount >= quiz.allowedAttempts) return false;
+    if (quiz.howManyAttempts && attemptCount >= quiz.howManyAttempts) return false;
     return true;
   };
 
@@ -398,7 +398,7 @@ export default function QuizPreview() {
   }).length;
 
   // Show previous attempt info for students who can't retake
-  if (isStudent && !canTakeQuiz() && !showResults) {
+  if (isStudent && !canTakeQuiz() && !showResults && ) {
     return (
       <div className="container mt-4">
         <h2>{quiz.title}</h2>
@@ -409,7 +409,7 @@ export default function QuizPreview() {
             <p><strong>Your Score:</strong> {latestAttempt.score} / {latestAttempt.totalPoints} 
               ({Math.round((latestAttempt.score / latestAttempt.totalPoints) * 100)}%)</p>
           )}
-          <p>Attempts used: {attemptCount} / {quiz.allowedAttempts || 1}</p>
+          <p>Attempts used: {attemptCount} / {quiz.howManyAttempts || 1}</p>
           <Button variant="primary" onClick={handleBackToQuizzes}>Back to Quizzes</Button>
         </Alert>
       </div>
@@ -426,7 +426,7 @@ export default function QuizPreview() {
           </p>
           {isStudent && (
             <small className="text-muted">
-              Attempts: {attemptCount} / {quiz.allowedAttempts || (quiz.multipleAttempts === false ? 1 : "Unlimited")}
+              Attempts: {attemptCount} / {quiz.howManyAttempts || (quiz.multipleAttempts === false ? 1 : "Unlimited")}
             </small>
           )}
         </div>
