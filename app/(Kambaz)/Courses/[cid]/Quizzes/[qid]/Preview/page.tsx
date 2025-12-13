@@ -489,9 +489,6 @@ export default function QuizPreview() {
           )}
           {showResults && (
             <div className="d-flex justify-content-end gap-2 mt-4">
-              {canTakeQuiz() && (
-                <Button variant="secondary" onClick={handleRetakeQuiz}>Retake</Button>
-              )}
               {isFaculty && (
                 <Button variant="primary" onClick={handleEditQuiz}>Edit Quiz</Button>
               )}
