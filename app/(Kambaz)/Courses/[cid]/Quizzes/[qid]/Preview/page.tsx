@@ -227,7 +227,7 @@ export default function QuizPreview() {
         alert("Multiple attempts are not allowed for this quiz.");
         return;
       }
-      if (quiz.allowedAttempts && attemptCount >= quiz.allowedAttempts) {
+      if (quiz.multipleAttempts && attemptCount >= quiz.allowedAttempts) {
         alert(`You have reached the maximum number of attempts (${quiz.allowedAttempts}).`);
         return;
       }
@@ -241,7 +241,7 @@ export default function QuizPreview() {
   const canTakeQuiz = () => {
     if (isFaculty) return true;
     if (quiz.multipleAttempts === false && attemptCount >= 1) return false;
-    if (quiz.allowedAttempts && attemptCount >= quiz.allowedAttempts) return false;
+    if (quiz.multipleAttempts && attemptCount >= quiz.allowedAttempts) return false;
     return true;
   };
 
