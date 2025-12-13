@@ -103,18 +103,33 @@ export default function QuizPreview() {
 
   const checkAnswer = (question: any, userAnswer: any) => {
     if (userAnswer === undefined || userAnswer === null) return false;
+    if (Array.isArray(userAnswer) && userAnswer.length === 0) return false;
   
     switch (question.type) {
       case "multiple-choice":
-        const correctChoice = question.choices?.find((c: any) => c.isCorrect);
-        return userAnswer === correctChoice?._id;
+        if (question.allowMultipleCorrect) {
+          // For multiple correct answers, check if user selected all correct ones
+          const correctChoiceIds = question.choices
+            ?.filter((c: any) => c.isCorrect)
+            .map((c: any, i: number) => c._id || `choice-${i}`);
+          const userAnswerArray = Array.isArray(userAnswer) ? userAnswer : [userAnswer];
+          // Check if arrays have same elements
+          if (correctChoiceIds?.length !== userAnswerArray.length) return false;
+          return correctChoiceIds?.every((id: string) => userAnswerArray.includes(id));
+        } else {
+          // Single correct answer
+          const correctChoice = question.choices?.find((c: any) => c.isCorrect);
+          const correctChoiceId = correctChoice?._id || 
+            `choice-${question.choices?.findIndex((c: any) => c.isCorrect)}`;
+          return userAnswer === correctChoiceId;
+        }
   
       case "true-false":
         return String(userAnswer).toLowerCase().trim() === String(question.correctAnswer).toLowerCase().trim();
   
       case "fill-blank":
         if (!question.possibleAnswers || question.possibleAnswers.length === 0) return false;
-        const user = userAnswer.toLowerCase().trim();
+        const user = String(userAnswer).toLowerCase().trim();
         return question.possibleAnswers.some(
           (ans: string) => ans.toLowerCase().trim() === user
         );
@@ -139,8 +154,9 @@ export default function QuizPreview() {
     let earnedScore = 0;
     const totalPoints = questions.reduce((sum, q) => sum + (q.points || 0), 0);
     
-    questions.forEach((q) => {
-      if (checkAnswer(q, answers[q._id])) earnedScore += q.points;
+    questions.forEach((q, index) => {
+      const questionId = q._id || `question-${index}`;
+      if (checkAnswer(q, answers[questionId])) earnedScore += q.points;
     });
     
     setScore(earnedScore);
@@ -149,11 +165,12 @@ export default function QuizPreview() {
     if (isStudent && quizId) {
       try {
         // Format answers to match schema: { question, answer, isCorrect, pointsEarned }
-        const formattedAnswers = questions.map((q) => {
-          const userAnswer = answers[q._id];
+        const formattedAnswers = questions.map((q, index) => {
+          const questionId = q._id || `question-${index}`;
+          const userAnswer = answers[questionId] ?? null;
           const isCorrect = checkAnswer(q, userAnswer);
           return {
-            question: q._id,
+            question: questionId,
             answer: userAnswer,
             isCorrect: isCorrect,
             pointsEarned: isCorrect ? q.points : 0,
@@ -212,12 +229,22 @@ export default function QuizPreview() {
   };
 
   const renderQuestion = (question: any, index: number) => {
-    const userAnswer = answers[question._id];
+    // Use index as fallback if _id is missing
+    const questionId = question._id || `question-${index}`;
+    const userAnswer = answers[questionId];
     const isCorrect = showResults ? checkAnswer(question, userAnswer) : null;
     const showCorrectAnswers = isFaculty || (isStudent && quiz?.showCorrectAnswers !== false);
+
+    // Debug logging - remove after fixing
+    console.log(`Question ${index}:`, { 
+      id: questionId, 
+      type: question.type, 
+      allowMultipleCorrect: question.allowMultipleCorrect,
+      choices: question.choices 
+    });
   
     return (
-      <Card key={question._id} className="mb-4">
+      <Card key={questionId} className="mb-4">
         <Card.Body>
           <div className="d-flex justify-content-between align-items-start mb-3">
             <h5>Question {index + 1}</h5>
@@ -228,22 +255,41 @@ export default function QuizPreview() {
           {/* Multiple Choice */}
           {question.type === "multiple-choice" &&
             question.choices?.map((choice: any, i: number) => {
-              const isSelected = userAnswer === choice._id; 
+              const choiceId = choice._id || `choice-${i}`;
+              const isSelected = question.allowMultipleCorrect
+                ? (userAnswer || []).includes(choiceId)
+                : userAnswer === choiceId;
               const showCorrect = showResults && showCorrectAnswers && choice.isCorrect;
               const showIncorrect = showResults && isSelected && !choice.isCorrect;
               return (
-                <div key={i} className={`mb-2 p-2 rounded ${showCorrect ? "bg-success bg-opacity-10 border border-success" : showIncorrect ? "bg-danger bg-opacity-10 border border-danger" : ""}`}>
+                <div key={choiceId} className={`mb-2 p-2 rounded ${showCorrect ? "bg-success bg-opacity-10 border border-success" : showIncorrect ? "bg-danger bg-opacity-10 border border-danger" : ""}`}>
                   <Form.Check
                     type={question.allowMultipleCorrect ? "checkbox" : "radio"}
-                    id={`${question._id}-choice-${i}`}
-                    name={`question-${question._id}`}
+                    id={`${questionId}-choice-${i}`}
+                    name={`question-${questionId}`}
                     label={choice.text}
-                    checked={
-                      question.allowMultipleCorrect
-                        ? (answers[question._id] || []).includes(choice._id)
-                        : answers[question._id] === choice._id
-                    }
-                    onChange={() => handleAnswerChange(question, choice._id)}
+                    checked={isSelected}
+                    onChange={() => {
+                      if (question.allowMultipleCorrect) {
+                        const currentAnswers = answers[questionId] || [];
+                        if (currentAnswers.includes(choiceId)) {
+                          setAnswers({
+                            ...answers,
+                            [questionId]: currentAnswers.filter((id: string) => id !== choiceId),
+                          });
+                        } else {
+                          setAnswers({
+                            ...answers,
+                            [questionId]: [...currentAnswers, choiceId],
+                          });
+                        }
+                      } else {
+                        setAnswers({
+                          ...answers,
+                          [questionId]: choiceId,
+                        });
+                      }
+                    }}
                     disabled={showResults}
                   />
                 </div>
@@ -260,8 +306,8 @@ export default function QuizPreview() {
                 <div key={value.toString()} className={`mb-2 p-2 rounded ${showCorrect ? "bg-success bg-opacity-10 border border-success" : showIncorrect ? "bg-danger bg-opacity-10 border border-danger" : ""}`}>
                   <Form.Check
                     type="radio"
-                    id={`${question._id}-${value}`}
-                    name={`question-${question._id}`}
+                    id={`${questionId}-${value}`}
+                    name={`question-${questionId}`}
                     label={
                       <span>
                         {value ? "True" : "False"}
@@ -270,7 +316,7 @@ export default function QuizPreview() {
                       </span>
                     }
                     checked={isSelected}
-                    onChange={() => handleAnswerChange(question, value)}
+                    onChange={() => setAnswers({ ...answers, [questionId]: value })}
                     disabled={showResults}
                   />
                 </div>
@@ -284,7 +330,7 @@ export default function QuizPreview() {
                 type="text"
                 placeholder="Type your answer here"
                 value={userAnswer || ""}
-                onChange={(e) => handleAnswerChange(question, e.target.value)}
+                onChange={(e) => setAnswers({ ...answers, [questionId]: e.target.value })}
                 disabled={showResults}
                 className={showResults ? (isCorrect ? "border-success" : "border-danger") : ""}
               />
@@ -326,7 +372,14 @@ export default function QuizPreview() {
   }
 
   const totalPoints = questions.reduce((sum, q) => sum + (q.points || 0), 0);
-  const answeredCount = Object.keys(answers).length;
+  const answeredCount = questions.filter((q, index) => {
+    const questionId = q._id || `question-${index}`;
+    const answer = answers[questionId];
+    if (answer === undefined || answer === null) return false;
+    if (Array.isArray(answer) && answer.length === 0) return false;
+    if (typeof answer === 'string' && answer.trim() === '') return false;
+    return true;
+  }).length;
 
   // Show previous attempt info for students who can't retake
   if (isStudent && !canTakeQuiz() && !showResults) {
