@@ -181,13 +181,37 @@ export default function NewQuiz() {
             <Col xs={9}>
               <FormSelect 
                 value={quiz.multipleAttempts ? "Yes" : "No"}
-                onChange={(e) => setQuiz({ ...quiz, multipleAttempts: e.target.value === "Yes" })}
+                onChange={(e) => setQuiz({ 
+                  ...quiz, 
+                  multipleAttempts: e.target.value === "Yes",
+                  howManyAttempts: e.target.value === "Yes" ? (quiz.howManyAttempts > 1 ? quiz.howManyAttempts : 2) : 1
+                })}
               >
                 <option>No</option>
                 <option>Yes</option>
               </FormSelect>
             </Col>
           </Row>
+
+          {/* How Many Attempts - Only show when Multiple Attempts is Yes */}
+          {quiz.multipleAttempts && (
+            <Row className="mb-3">
+              <Col xs={3}>
+                <FormLabel className="float-end">How Many Attempts</FormLabel>
+              </Col>
+              <Col xs={9}>
+                <InputGroup>
+                  <FormControl 
+                    type="number"
+                    min={2}
+                    value={quiz.howManyAttempts}
+                    onChange={(e) => setQuiz({ ...quiz, howManyAttempts: parseInt(e.target.value) || 2 })}
+                  />
+                  <InputGroupText>Attempts</InputGroupText>
+                </InputGroup>
+              </Col>
+            </Row>
+          )}
 
           <Row className="mb-3">
             <Col xs={3}>

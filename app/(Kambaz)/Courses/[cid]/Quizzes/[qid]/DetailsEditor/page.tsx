@@ -292,7 +292,7 @@ export default function QuizEditor() {
                   <FormControl 
                     id="wd-max-attempts"
                     type="number"
-                    min="1"
+                    min="2"
                     value={quiz.howManyAttempts || 1}
                     onChange={(e) => setQuiz({ ...quiz, howManyAttempts: parseInt(e.target.value) || 1 })}
                   />
