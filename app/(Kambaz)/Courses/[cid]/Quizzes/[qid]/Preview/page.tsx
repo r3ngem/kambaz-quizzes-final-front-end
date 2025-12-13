@@ -107,20 +107,25 @@ export default function QuizPreview() {
   
     switch (question.type) {
       case "multiple-choice":
-        if (question.allowMultipleCorrect) {
+        // Auto-detect if multiple answers are correct
+        const correctChoices = question.choices?.filter((c: any) => c.isCorrect) || [];
+        const isMultiSelect = question.allowMultipleCorrect || correctChoices.length > 1;
+        
+        if (isMultiSelect) {
           // For multiple correct answers, check if user selected all correct ones
-          const correctChoiceIds = question.choices
-            ?.filter((c: any) => c.isCorrect)
-            .map((c: any, i: number) => c._id || `choice-${i}`);
+          const correctChoiceIds = correctChoices.map((c: any, i: number) => {
+            const originalIndex = question.choices.findIndex((choice: any) => choice === c);
+            return c._id || `choice-${originalIndex}`;
+          });
           const userAnswerArray = Array.isArray(userAnswer) ? userAnswer : [userAnswer];
           // Check if arrays have same elements
-          if (correctChoiceIds?.length !== userAnswerArray.length) return false;
-          return correctChoiceIds?.every((id: string) => userAnswerArray.includes(id));
+          if (correctChoiceIds.length !== userAnswerArray.length) return false;
+          return correctChoiceIds.every((id: string) => userAnswerArray.includes(id));
         } else {
           // Single correct answer
           const correctChoice = question.choices?.find((c: any) => c.isCorrect);
-          const correctChoiceId = correctChoice?._id || 
-            `choice-${question.choices?.findIndex((c: any) => c.isCorrect)}`;
+          const correctIndex = question.choices?.findIndex((c: any) => c.isCorrect);
+          const correctChoiceId = correctChoice?._id || `choice-${correctIndex}`;
           return userAnswer === correctChoiceId;
         }
   
@@ -235,13 +240,9 @@ export default function QuizPreview() {
     const isCorrect = showResults ? checkAnswer(question, userAnswer) : null;
     const showCorrectAnswers = isFaculty || (isStudent && quiz?.showCorrectAnswers !== false);
 
-    // Debug logging - remove after fixing
-    console.log(`Question ${index}:`, { 
-      id: questionId, 
-      type: question.type, 
-      allowMultipleCorrect: question.allowMultipleCorrect,
-      choices: question.choices 
-    });
+    // Auto-detect if multiple answers are correct
+    const correctChoicesCount = question.choices?.filter((c: any) => c.isCorrect).length || 0;
+    const isMultipleCorrect = question.allowMultipleCorrect || correctChoicesCount > 1;
   
     return (
       <Card key={questionId} className="mb-4">
@@ -251,12 +252,15 @@ export default function QuizPreview() {
             <span className="badge bg-secondary">{question.points} pts</span>
           </div>
           <p className="mb-3"><strong>{question.question}</strong></p>
+          {question.type === "multiple-choice" && isMultipleCorrect && !showResults && (
+            <p className="text-muted small mb-2"><em>Select all that apply</em></p>
+          )}
   
           {/* Multiple Choice */}
           {question.type === "multiple-choice" &&
             question.choices?.map((choice: any, i: number) => {
               const choiceId = choice._id || `choice-${i}`;
-              const isSelected = question.allowMultipleCorrect
+              const isSelected = isMultipleCorrect
                 ? (userAnswer || []).includes(choiceId)
                 : userAnswer === choiceId;
               const showCorrect = showResults && showCorrectAnswers && choice.isCorrect;
@@ -264,13 +268,13 @@ export default function QuizPreview() {
               return (
                 <div key={choiceId} className={`mb-2 p-2 rounded ${showCorrect ? "bg-success bg-opacity-10 border border-success" : showIncorrect ? "bg-danger bg-opacity-10 border border-danger" : ""}`}>
                   <Form.Check
-                    type={question.allowMultipleCorrect ? "checkbox" : "radio"}
+                    type={isMultipleCorrect ? "checkbox" : "radio"}
                     id={`${questionId}-choice-${i}`}
                     name={`question-${questionId}`}
                     label={choice.text}
                     checked={isSelected}
                     onChange={() => {
-                      if (question.allowMultipleCorrect) {
+                      if (isMultipleCorrect) {
                         const currentAnswers = answers[questionId] || [];
                         if (currentAnswers.includes(choiceId)) {
                           setAnswers({
@@ -338,7 +342,7 @@ export default function QuizPreview() {
                 <Alert variant={isCorrect ? "success" : "danger"} className="mt-2 mb-0 py-2">
                   {isCorrect
                     ? "✓ Correct!"
-                    : `✗ Incorrect. Acceptable answers: ${question.possibleAnswers?.join(", ")}`}
+                    : `✗ Incorrect. Acceptable answers: ${question.possibleAnswers?.map((a: string) => `"${a}"`).join(" or ")}`}
                 </Alert>
               )}
               {showResults && !showCorrectAnswers && (
