@@ -69,19 +69,6 @@ export default function QuizPreview() {
     fetchQuizData();
   }, [quizId, currentUser?.role]);
 
-  useEffect(() => {
-  if (latestAttempt && isStudent) {
-    const restoredAnswers: any = {};
-    latestAttempt.answers.forEach((a: any) => {
-      restoredAnswers[a.question] = a.answer;
-    });
-
-    setAnswers(restoredAnswers);
-    setScore(latestAttempt.score);
-    setShowResults(true); // force review mode
-  }
-  }, [latestAttempt, isStudent]);
-
   // Check if quiz is available for students
   useEffect(() => {
     if (!isLoading && isStudent && quiz) {
@@ -251,14 +238,10 @@ export default function QuizPreview() {
     setScore(0);
   };
 
-  const isAttemptsExhausted =
-  isStudent &&
-  ((quiz.multipleAttempts === false && attemptCount >= 1) ||
-   (quiz.allowedAttempts && attemptCount >= quiz.allowedAttempts));
-
   const canTakeQuiz = () => {
     if (isFaculty) return true;
-    if (isAttemptsExhausted) return false;
+    if (quiz.multipleAttempts === false && attemptCount >= 1) return false;
+    if (quiz.allowedAttempts && attemptCount >= quiz.allowedAttempts) return false;
     return true;
   };
 
@@ -413,6 +396,25 @@ export default function QuizPreview() {
     if (typeof answer === 'string' && answer.trim() === '') return false;
     return true;
   }).length;
+
+  // Show previous attempt info for students who can't retake
+  if (isStudent && !canTakeQuiz() && !showResults) {
+    return (
+      <div className="container mt-4">
+        <h2>{quiz.title}</h2>
+        <Alert variant="info" className="mt-4">
+          <h4>Quiz Already Completed</h4>
+          <p>You have already completed this quiz.</p>
+          {latestAttempt && (
+            <p><strong>Your Score:</strong> {latestAttempt.score} / {latestAttempt.totalPoints} 
+              ({Math.round((latestAttempt.score / latestAttempt.totalPoints) * 100)}%)</p>
+          )}
+          <p>Attempts used: {attemptCount} / {quiz.allowedAttempts || 1}</p>
+          <Button variant="primary" onClick={handleBackToQuizzes}>Back to Quizzes</Button>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="container mt-4">
