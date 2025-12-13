@@ -398,7 +398,7 @@ export default function QuizPreview() {
   }).length;
 
   // Show previous attempt info for students who can't retake
-  if (isStudent && !canTakeQuiz() && !showResults && ) {
+  if (isStudent && !canTakeQuiz() && !showResults ) {
     return (
       <div className="container mt-4">
         <h2>{quiz.title}</h2>
