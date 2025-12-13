@@ -79,6 +79,14 @@ export default function QuizList() {
     return "Available";
   };
 
+  // Sort quizzes by due date (earliest first, quizzes without due dates at the end)
+  const sortedQuizzes = [...quizzes].sort((a, b) => {
+    if (!a.dueDate && !b.dueDate) return 0;
+    if (!a.dueDate) return 1;
+    if (!b.dueDate) return -1;
+    return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+  });
+
   if (loading) return <div className="p-4">Loading quizzes...</div>;
 
   return (
@@ -103,7 +111,7 @@ export default function QuizList() {
         </div>
       ) : (
         <ListGroup className="rounded-0">
-          {quizzes.map((quiz) => (
+          {sortedQuizzes.map((quiz) => (
             <ListGroupItem 
               key={quiz._id} 
               className="d-flex align-items-center p-3"
