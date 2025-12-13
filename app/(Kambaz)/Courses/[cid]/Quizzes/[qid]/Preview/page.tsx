@@ -134,9 +134,21 @@ export default function QuizPreview() {
   
       case "fill-blank":
         if (!question.possibleAnswers || question.possibleAnswers.length === 0) return false;
-        const user = String(userAnswer).toLowerCase().trim();
-        return question.possibleAnswers.some(
-          (ans: string) => ans.toLowerCase().trim() === user
+        
+        // User needs to provide ALL correct answers (comma-separated)
+        const userAnswers = String(userAnswer)
+          .split(",")
+          .map((a: string) => a.toLowerCase().trim())
+          .filter((a: string) => a.length > 0);
+        
+        const correctAnswers = question.possibleAnswers.map(
+          (ans: string) => ans.toLowerCase().trim()
+        );
+        
+        // Check if user provided all correct answers (order doesn't matter)
+        if (userAnswers.length !== correctAnswers.length) return false;
+        return correctAnswers.every((correct: string) => 
+          userAnswers.some((user: string) => user === correct)
         );
   
       default:
